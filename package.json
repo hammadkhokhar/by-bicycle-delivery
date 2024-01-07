@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "license": "MIT",
   "description": "Placing and persisting orders microservice",
+  "prisma": {
+    "schema": "src/app/v1/prisma/schema.prisma"
+  },
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node --unhandled-rejections=strict ./dist/app.js",
