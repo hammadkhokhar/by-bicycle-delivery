@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import logger from "../middleware/logger.middleware";
 import { IOrder } from "../interfaces/orders.interface";
 import axios, { AxiosRequestConfig } from "axios";
