@@ -1,7 +1,7 @@
 import { Application } from "express";
 import { CommonRoutesConfig } from "../../../common/common.routes.config";
 import ordersController from "../controllers/orders.controller";
-import validationMiddleware from "../middleware/validation.middleware";
+import validationMiddleware from "../middleware/validation/order.validation";
 
 /**
  * Class representing routes related to orders.

@@ -15,16 +15,18 @@ class OrdersController {
     res.status(200).send("API Services Healthy.");
   }
 
+  /**
+   * Handles the request to get a quotation for an order.
+   */
   async getQuotation(req: Request, res: Response): Promise<void> {
-    const cb = new CargoboardServices();
-
-    // Log request
+    // Log request information
     logger.info("Request", {
       endpoint: req.originalUrl,
       method: req.method,
       body: req.body,
     });
-    const orderRequest: IOrder = req.body;
+    const cb = new CargoboardServices(); // Create an instance of CargoboardServices
+    const orderRequest: IOrder = req.body; // Extract order information from the request body
 
     let distance: number = 0,
       price: number = 0;
@@ -33,6 +35,7 @@ class OrdersController {
       // Get Distance
       let routeDistance = await cb.getDistance(orderRequest);
 
+      // For testing purposes, overwrite routeDistance with a fixed value
       routeDistance = 50;
 
       // Distance validation
