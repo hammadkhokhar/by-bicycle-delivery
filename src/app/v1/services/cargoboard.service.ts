@@ -1,10 +1,16 @@
 import logger from "../middleware/logger.middleware";
 import { IOrder } from "../interfaces/orders.interface";
 import axios, { AxiosRequestConfig } from "axios";
-
+/**
+ * CargoboardServices class handles communication with the distance service.
+ */
 class CargoboardServices {
+  /**
+   * Get distance between shipper and consignee addresses.
+   * @param {IOrder} orderRequest - The order details.
+   * @returns {Promise<number>} - The distance between addresses.
+   */
   async getDistance(orderRequest: IOrder): Promise<number> {
-    // Configure request
     const distanceRequestConfig: AxiosRequestConfig = {
       method: "get",
       url: `https://distance.staging.cargoboard.com/distances/${orderRequest.shipper.address.shipperCountry}/${orderRequest.shipper.address.shipperPostcode}/${orderRequest.consignee.address.consigneeCountry}/${orderRequest.consignee.address.consigneePostcode}`,
