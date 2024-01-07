@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id                  Int               @id @default(autoincrement())
+  shipper             Shipper           @relation(fields: [shipperId], references: [id])
+  shipperId           Int
+  consignee           Consignee         @relation(fields: [consigneeId], references: [id])
+  consigneeId         Int
+  shipperPickupOn     DateTime
+  distance            Float
+  price               Float    
+  placedAt            DateTime
+  status              String
+  priority            String
+  request_origin      String
+  lastModifiedBy      String
+  lastModifiedAt      DateTime
+}
+
+model Shipper {
+  id                   Int       @id @default(autoincrement())
+  shipperCountry       String
+  shipperCity          String
+  shipperPostcode      String
+  orders               Order[]   // One-to-many relationship with Order
+}
+
+model Consignee {
+  id                   Int       @id @default(autoincrement())
+  consigneeCountry     String
+  consigneeCity        String
+  consigneePostcode    String
+  orders               Order[]   // One-to-many relationship with Order
+}
