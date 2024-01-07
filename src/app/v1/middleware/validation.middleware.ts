@@ -11,34 +11,6 @@ class ValidationMiddleware {
    * @returns A middleware function.
    */
   validateOrder() {
-    const checkForExtraProperties = (
-      actual: Record<string, any>,
-      expected: Record<string, any>,
-    ): string[] => {
-      const extraProperties: string[] = [];
-
-      for (const prop in actual) {
-        if (!expected.hasOwnProperty(prop)) {
-          extraProperties.push(prop);
-        } else if (
-          typeof actual[prop] === "object" &&
-          !Array.isArray(actual[prop]) &&
-          actual[prop] !== null
-        ) {
-          // Recursively check nested objects
-          const nestedExtraProperties = checkForExtraProperties(
-            actual[prop],
-            expected[prop],
-          );
-          extraProperties.push(
-            ...nestedExtraProperties.map((np) => `${prop}.${np}`),
-          );
-        }
-      }
-
-      return extraProperties;
-    };
-
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
         const allowedCountries = [
@@ -116,24 +88,9 @@ class ValidationMiddleware {
               },
             ),
           }),
-        });
+        }).catchall(z.unknown());
 
         const validatedData = await orderSchema.parseAsync(req.body);
-
-        // Check for extra properties in req.body
-        const extraProperties = checkForExtraProperties(
-          req.body,
-          validatedData,
-        );
-
-        if (extraProperties.length > 0) {
-          throw new Error(
-            `Invalid request body. Extra properties found: ${extraProperties.join(
-              ", ",
-            )}`,
-          );
-        }
-
         req.body = validatedData;
         next();
       } catch (error) {
