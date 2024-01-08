@@ -87,33 +87,58 @@ class OrdersController {
         // If there is an existing order, apply a 10 EUR discount
         price = orderCount > 0 ? price - 10 : price;
 
+        // Convert price to cents
+        price = price * 100;
+
         /**
          * Save order(quotation) to database
          */
+        // Check if shipper already exist in database
+        const existingShipper = await prisma.shipper.findFirst({
+          where: {
+            shipperCountry: orderRequest.shipper.address.shipperCountry,
+            shipperCity: orderRequest.shipper.address.shipperCity,
+            shipperPostcode: orderRequest.shipper.address.shipperPostcode,
+          },
+        });
+        
+        // Check if consignee already exist in database
+        const existingConsignee = await prisma.consignee.findFirst({
+          where: {
+            consigneeCountry: orderRequest.consignee.address.consigneeCountry,
+            consigneeCity: orderRequest.consignee.address.consigneeCity,
+            consigneePostcode: orderRequest.consignee.address.consigneePostcode,
+          },
+        });
+        
+        // Create order with quotation status
         const order = await prisma.order.create({
           data: {
-            shipper:{
-              create:{
-                shipperCountry:orderRequest.shipper.address.shipperCountry,
-                shipperCity:orderRequest.shipper.address.shipperCity,
-                shipperPostcode:orderRequest.shipper.address.shipperPostcode,
-              }
-            },
-            consignee:{
-              create:{
-                consigneeCountry:orderRequest.consignee.address.consigneeCountry,
-                consigneeCity:orderRequest.consignee.address.consigneeCity,
-                consigneePostcode:orderRequest.consignee.address.consigneePostcode,
-              }
-            },
-            shipperPickupOn:orderRequest.shipper.shipperPickupOn,
-            consigneeDeliverOn:new Date(orderRequest.consignee.consigneeDeliveryOn),
-            distance:routeDistance,
-            price:price,
+            shipper: existingShipper
+              ? { connect: { id: existingShipper.id } } // Connect to existing shipper
+              : { // Create a new shipper if it doesn't exist
+                  create: {
+                    shipperCountry: orderRequest.shipper.address.shipperCountry,
+                    shipperCity: orderRequest.shipper.address.shipperCity,
+                    shipperPostcode: orderRequest.shipper.address.shipperPostcode,
+                  },
+                },
+            consignee: existingConsignee
+              ? { connect: { id: existingConsignee.id } } // Connect to existing consignee
+              : { // Create a new consignee if it doesn't exist
+                  create: {
+                    consigneeCountry: orderRequest.consignee.address.consigneeCountry,
+                    consigneeCity: orderRequest.consignee.address.consigneeCity,
+                    consigneePostcode: orderRequest.consignee.address.consigneePostcode,
+                  },
+                },
+            shipperPickupOn: orderRequest.shipper.shipperPickupOn,
+            consigneeDeliverOn: new Date(orderRequest.consignee.consigneeDeliveryOn),
+            distance: routeDistance,
+            price: price,
             quoteId: uuidv4(),
-            placedAt:moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-            status:"QUOTED"
-          },
+            placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ')
+          }
         });
 
         /**
@@ -170,8 +195,19 @@ class OrdersController {
      */
     if (!getOrder) {
       res.status(404).send({
-        message: "Order not found",
+        message: "No active quotation found",
         error: "Not Found",
+      });
+      return;
+    }
+
+    /**
+     * If quotation has expired, send error message
+     */
+    if(moment(getOrder.placedAt).add(1, 'hour').isBefore(moment())){
+      res.status(422).send({
+        message: "Quote has expired, please request a new quote or contact us.",
+        error: "Bad Request",
       });
       return;
     }
@@ -188,6 +224,7 @@ class OrdersController {
       }
     });
 
+    // Send response back to client
     res.status(200).send({
       message: "Booking successful.",
       quoteId: updateOrder.quoteId,

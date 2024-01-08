@@ -28,7 +28,7 @@ model Order {
   distance           Float
   price              Float
   placedAt           DateTime      @map(name: "placed_at") @db.Timestamptz
-  status             OrderStatus
+  status             OrderStatus   @default(QUOTED)
   lastModifiedBy     String        @default("system")
   lastModifiedAt     DateTime      @default(now()) @map(name: "last_modified_at") @db.Timestamptz
   createdAt          DateTime      @default(now()) @map(name: "created_at") @db.Timestamptz
