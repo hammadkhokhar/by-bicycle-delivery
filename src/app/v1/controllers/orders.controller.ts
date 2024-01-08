@@ -62,9 +62,35 @@ class OrdersController {
 
       try{
         /**
+         * Check if there is an existing order with the same shipper, consignee, pickup date
+         */
+        const pickupDay = moment(orderRequest.shipper.shipperPickupOn).startOf('day');
+        const orderCount = await prisma.order.count({
+          where:{
+            shipperPickupOn: {
+              gte: pickupDay.toDate(),             
+              lt: pickupDay.clone().add(1, 'day').toDate(),
+            },
+            shipper:{
+              shipperCountry:orderRequest.shipper.address.shipperCountry,
+              shipperCity:orderRequest.shipper.address.shipperCity,
+              shipperPostcode:orderRequest.shipper.address.shipperPostcode,
+            },
+            consignee:{
+              consigneeCountry:orderRequest.consignee.address.consigneeCountry,
+              consigneeCity:orderRequest.consignee.address.consigneeCity,
+              consigneePostcode:orderRequest.consignee.address.consigneePostcode,
+            }
+          }
+        });
+
+        // If there is an existing order, apply a 10 EUR discount
+        price = orderCount > 0 ? price - 10 : price;
+
+        /**
          * Save order(quotation) to database
          */
-        await prisma.order.create({
+        const order = await prisma.order.create({
           data: {
             shipper:{
               create:{
@@ -97,7 +123,7 @@ class OrdersController {
           distance:routeDistance,
           price:price,
           quoteExpiry:moment().add(1, 'hour').valueOf(),
-          quoteId: uuidv4(),
+          quoteId: order.quoteId,
           status:"QUOTED",
         }
 
