@@ -7,35 +7,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OrderStatus {
+  QUOTED
+  PENDING
+  AWAITING_PICKUP
+  SHIPPED
+  ENROUTE
+  DELIVERED
+}
+
 model Order {
-  id                  Int               @id @default(autoincrement())
-  shipper             Shipper           @relation(fields: [shipperId], references: [id])
-  shipperId           Int
-  consignee           Consignee         @relation(fields: [consigneeId], references: [id])
-  consigneeId         Int
-  shipperPickupOn     DateTime
-  distance            Float
-  price               Float    
-  placedAt            DateTime
-  status              String
-  priority            String
-  request_origin      String
-  lastModifiedBy      String
-  lastModifiedAt      DateTime
+  id                 Int           @id @default(autoincrement())
+  shipper            Shipper       @relation(fields: [shipperId], references: [id])
+  shipperId          Int
+  consignee          Consignee     @relation(fields: [consigneeId], references: [id])
+  consigneeId        Int
+  shipperPickupOn    DateTime
+  consigneeDeliverOn DateTime
+  distance           Float
+  price              Float
+  placedAt           DateTime
+  status             OrderStatus
+  request_origin     String
+  lastModifiedBy     String        @default("system")
+  lastModifiedAt     DateTime      @default(now())
+  createdAt          DateTime      @default(now())
 }
 
 model Shipper {
-  id                   Int       @id @default(autoincrement())
-  shipperCountry       String
-  shipperCity          String
-  shipperPostcode      String
-  orders               Order[]   // One-to-many relationship with Order
+  id              Int     @id @default(autoincrement())
+  shipperCountry  String
+  shipperCity     String
+  shipperPostcode String
+  orders          Order[] // One-to-many relationship with Order
 }
 
 model Consignee {
-  id                   Int       @id @default(autoincrement())
-  consigneeCountry     String
-  consigneeCity        String
-  consigneePostcode    String
-  orders               Order[]   // One-to-many relationship with Order
+  id                Int     @id @default(autoincrement())
+  consigneeCountry  String
+  consigneeCity     String
+  consigneePostcode String
+  orders            Order[] // One-to-many relationship with Order
 }
