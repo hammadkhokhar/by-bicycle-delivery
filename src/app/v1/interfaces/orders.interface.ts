@@ -4,20 +4,20 @@
 interface IOrder {
   shipper: {
     address: {
-      shipperCountry: string;
-      shipperCity: string;
-      shipperPostcode: string;
-    };
-    shipperPickupOn: string;
-  };
+      shipperCountry: string
+      shipperCity: string
+      shipperPostcode: string
+    }
+    shipperPickupOn: string
+  }
   consignee: {
     address: {
-      consigneeCountry: string;
-      consigneeCity: string;
-      consigneePostcode: string;
-    };
-    consigneeDeliveryOn: string;
-  };
+      consigneeCountry: string
+      consigneeCity: string
+      consigneePostcode: string
+    }
+    consigneeDeliveryOn: string
+  }
 }
 
-export { IOrder };
+export { IOrder }

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod'
 
 /**
  * Calculates the delivery price based on the route length.
@@ -9,13 +9,13 @@ export async function calculateDeliveryPrice(
   routeLength: number,
 ): Promise<number> {
   if (routeLength <= 50) {
-    return 100;
+    return 100
   } else if (routeLength <= 150) {
-    return 200;
+    return 200
   } else if (routeLength > 250) {
-    return 300;
+    return 300
   } else {
-    return 0;
+    return 0
   }
 }
 
@@ -27,7 +27,7 @@ export async function calculateDeliveryPrice(
 export async function validateRouteRange(distance: number) {
   const validatedDistance = z
     .object({ distance: z.number().min(3).max(300) })
-    .safeParse({ distance: distance });
-    
-  return validatedDistance;
+    .safeParse({ distance: distance })
+
+  return validatedDistance
 }

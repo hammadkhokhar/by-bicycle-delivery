@@ -1,12 +1,12 @@
-import { createLogger, format, transports } from "winston";
+import { createLogger, format, transports } from 'winston'
 
-const { combine, timestamp, printf, json, align } = format;
+const { combine, timestamp, printf, json, align } = format
 
 const logger = createLogger({
-  level: process.env.LOG_LEVEL || "info",
+  level: process.env.LOG_LEVEL || 'info',
   format: combine(
     timestamp({
-      format: "YYYY-MM-DD hh:mm:ss.SSS A",
+      format: 'YYYY-MM-DD hh:mm:ss.SSS A',
     }),
     align(),
     json(),
@@ -16,9 +16,9 @@ const logger = createLogger({
   ),
   transports: [
     new transports.Console(),
-    new transports.File({ filename: "info.log", level: "info" }),
-    new transports.File({ filename: "error.log", level: "error" }),
+    new transports.File({ filename: 'info.log', level: 'info' }),
+    new transports.File({ filename: 'error.log', level: 'error' }),
   ],
-});
+})
 
-export default logger;
+export default logger

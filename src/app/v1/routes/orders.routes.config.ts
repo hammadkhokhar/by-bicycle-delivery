@@ -1,7 +1,7 @@
-import { Application } from "express";
-import { CommonRoutesConfig } from "../../../common/common.routes.config";
-import ordersController from "../controllers/orders.controller";
-import validationMiddleware from "../middleware/validation/order.validation";
+import { Application } from 'express'
+import { CommonRoutesConfig } from '../../../common/common.routes.config'
+import ordersController from '../controllers/orders.controller'
+import validationMiddleware from '../middleware/validation/order.validation'
 
 /**
  * Class representing routes related to orders.
@@ -13,7 +13,7 @@ export class OrdersRoutes extends CommonRoutesConfig {
    * @param {Application} app - Express application.
    */
   constructor(app: Application) {
-    super(app, "OrdersRoutes");
+    super(app, 'OrdersRoutes')
   }
 
   /**
@@ -21,28 +21,26 @@ export class OrdersRoutes extends CommonRoutesConfig {
    * @returns {Application} - Configured Express application.
    */
   configureRoutes(): Application {
-    const routePrefix = "/api/v1/orders";
+    const routePrefix = '/api/v1/orders'
 
     // Index
-    this.app.route(`${routePrefix}`).get(ordersController.index);
-    
+    this.app.route(`${routePrefix}`).get(ordersController.index)
+
     // Quotation
     this.app
       .route(`${routePrefix}/quote`)
       // validates all input fields in the request body
       .all(validationMiddleware.validateOrder())
-      .post(ordersController.getQuotation);
+      .post(ordersController.getQuotation)
 
     // Create order
     this.app
       .route(`${routePrefix}/:quoteId`)
-      .post(ordersController.processOrder);
-    
-    // Get order status
-    this.app
-      .route(`${routePrefix}/:orderId`)
-      .get(ordersController.getOrder);
+      .post(ordersController.processOrder)
 
-    return this.app;
+    // Get order status
+    this.app.route(`${routePrefix}/:orderId`).get(ordersController.getOrder)
+
+    return this.app
   }
 }

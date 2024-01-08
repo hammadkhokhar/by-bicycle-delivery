@@ -8,4 +8,4 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest',
   },
   testTimeout: 10000,
-};
+}

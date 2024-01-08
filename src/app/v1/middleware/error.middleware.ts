@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { CustomError } from "../../../common/common.error.config";
+import { Request, Response, NextFunction } from 'express'
+import { CustomError } from '../../../common/common.error.config'
 
 /**
  * Custom error handler to standardize error objects returned to
@@ -12,30 +12,30 @@ function handleError(
   next: NextFunction,
 ) {
   // Check if the error has a 'stack' property before logging
-  if ("stack" in err) {
-    console.error(`Error caught: ${err.message}`);
-    console.error(`Stack trace: ${err.stack}`);
+  if ('stack' in err) {
+    console.error(`Error caught: ${err.message}`)
+    console.error(`Stack trace: ${err.stack}`)
   }
 
-  let customError = err;
+  let customError = err
 
   if (!(err instanceof CustomError)) {
-    console.log(err.name);
+    console.log(err.name)
     switch (err.name) {
-      case "UnauthorizedError":
+      case 'UnauthorizedError':
         customError = new CustomError(
           "Oh no, this is embarrassing. You're not allowed in here.",
           401,
-        );
-        break;
+        )
+        break
       default:
-        customError = new CustomError("Are you lost?", 404);
-        break;
+        customError = new CustomError('Are you lost?', 404)
+        break
     }
   }
 
   // Set the response content type to JSON
-  res.status((customError as CustomError).status).json(customError);
+  res.status((customError as CustomError).status).json(customError)
 }
 
-export default handleError;
+export default handleError
