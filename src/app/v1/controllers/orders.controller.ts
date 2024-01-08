@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 import moment from 'moment-timezone';
 moment.tz.setDefault('Europe/Berlin');
 import { PrismaClient } from "@prisma/client";
@@ -17,6 +18,9 @@ import CargoboardServices from "../services/cargoboard.service";
  * Controller class for handling orders-related requests.
  */
 class OrdersController {
+  /**
+   * Handles the request to get the status of the API.
+   */
   async index(req: Request, res: Response): Promise<void> {
     res.status(200).send("API Services Healthy.");
   }
@@ -39,9 +43,6 @@ class OrdersController {
     try {
       // Get Distance
       let routeDistance = await cb.getDistance(orderRequest);
-
-      // For testing purposes, overwrite routeDistance with a fixed value
-      routeDistance = 50;
 
       // Distance validation
       let routeDistanceValidation = await validateRouteRange(routeDistance);
@@ -175,13 +176,25 @@ class OrdersController {
       method: req.method,
       body: req.body,
     });
+    // check if quoteId is uuid with zod
+    const quoteIdSchema = z.string().uuid();
+    const quoteIdValidation = quoteIdSchema.safeParse(req.params.quoteId);
 
+    // If quoteId is not uuid, send error message
+    if (!quoteIdValidation.success) {
+      res.status(422).send({
+        message: "Invalid quote id",
+        error: "Bad Request",
+      });
+      return;
+    }
+    console.log(quoteIdValidation.data)
     /**
      * Get order from database
      */
     const getOrder = await prisma.order.findFirst({
       where: {
-        quoteId: req.params.quotationId,
+        quoteId: quoteIdValidation.data,
         status: "QUOTED",
       },
       include:{
@@ -217,7 +230,7 @@ class OrdersController {
      */
     const updateOrder = await prisma.order.update({
       where:{
-        quoteId: req.params.quotationId
+        quoteId: quoteIdValidation.data
       },
       data:{
         status: "BOOKED"
@@ -227,6 +240,7 @@ class OrdersController {
     // Send response back to client
     res.status(200).send({
       message: "Booking successful.",
+      orderId: updateOrder.id,
       quoteId: updateOrder.quoteId,
       status: "BOOKED",
     });
@@ -242,12 +256,24 @@ class OrdersController {
       method: req.method,
       body: req.body,
     });
+
+    const orderId = req.params.orderId;
+    
+    if (isNaN(Number(orderId))) {
+      res.status(422).send({
+        message: "Invalid order id",
+        error: "Bad Request",
+      });
+      return;
+    } 
+    
+
     /**
      * Get order from database
      */
     const order = await prisma.order.findFirst({
       where: {
-        quoteId: req.params.quotationId,
+        id: Number(req.params.orderId),
       },
       include:{
         shipper:true,

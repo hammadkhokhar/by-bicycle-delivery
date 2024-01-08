@@ -25,22 +25,22 @@ export class OrdersRoutes extends CommonRoutesConfig {
 
     // Index
     this.app.route(`${routePrefix}`).get(ordersController.index);
-
+    
     // Quotation
     this.app
-      .route(`${routePrefix}`)
+      .route(`${routePrefix}/quote`)
       // validates all input fields in the request body
       .all(validationMiddleware.validateOrder())
       .post(ordersController.getQuotation);
 
     // Create order
     this.app
-      .route(`${routePrefix}/:quotationId`)
+      .route(`${routePrefix}/:quoteId`)
       .post(ordersController.processOrder);
     
     // Get order status
     this.app
-      .route(`${routePrefix}/:quotationId`)
+      .route(`${routePrefix}/:orderId`)
       .get(ordersController.getOrder);
 
     return this.app;
