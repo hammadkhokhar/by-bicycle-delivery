@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { Request, Response, response } from "express";
-import { v5 as uuidv5 } from "uuid";
-import moment from "moment";
+import { v4 as uuidv4 } from "uuid";
+import moment from 'moment-timezone';
+moment.tz.setDefault('Europe/Berlin');
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import logger from "../middleware/logger.middleware";
@@ -33,7 +34,7 @@ class OrdersController {
     const cb = new CargoboardServices(); // Create an instance of CargoboardServices
     const orderRequest: IOrder = req.body; // Extract order information from the request body
 
-    let price: number = 0, quoteExpiry: string = "";
+    let price: number = 0;
 
     try {
       // Get Distance
@@ -58,68 +59,48 @@ class OrdersController {
 
       // calculate price
       price = await calculateDeliveryPrice(routeDistance);
-      quoteExpiry = moment().add(1, "hour").format("YYYY-MM-DD HH:mm:ss")
 
+      // placed at with miliseconds and timezone
       const orderObject = {
-        shipper:{
-          address:{
-            shipperCountry:orderRequest.shipper.address.shipperCountry,
-            shipperCity:orderRequest.shipper.address.shipperCity,
-            shipperPostcode:orderRequest.shipper.address.shipperPostcode,
-          },
-          shipperPickupOn:orderRequest.shipper.shipperPickupOn,
-        },
-        consignee:{
-          address:{
-            consigneeCountry:orderRequest.consignee.address.consigneeCountry,
-            consigneeCity:orderRequest.consignee.address.consigneeCity,
-            consigneePostcode:orderRequest.consignee.address.consigneePostcode,
-          },
-          consigneeDeliveryOn:orderRequest.consignee.consigneeDeliveryOn,
-        },
-        distance: routeDistance,
-        price: price,
-        quoteExpiry: new Date(quoteExpiry),
-        quoteId: uuidv5(JSON.stringify(orderRequest), uuidv5.URL),
-        updatedAt: new Date(),
-        createdAt: new Date(),
-        status: "QUOTATION",
-        requestOrigin: req.headers.origin || "",
-        lastModifiedBy: "SYSTEM",
-        lastModifiedAt: new Date(),
+        distance:routeDistance,
+        price:price,
+        quoteExpiry:moment().add(1, 'hour').valueOf(),
+        quoteId: uuidv4(),
+        status:"QUOTED",
       }
 
-      // Quotation creation
-      await prisma.order.create({
-        data: {
-          shipper:{
-            create:{
-              shipperCountry:orderRequest.shipper.address.shipperCountry,
-              shipperCity:orderRequest.shipper.address.shipperCity,
-              shipperPostcode:orderRequest.shipper.address.shipperPostcode,
-            }
+      try{
+        // Order creation with quoted status
+        await prisma.order.create({
+          data: {
+            shipper:{
+              create:{
+                shipperCountry:orderRequest.shipper.address.shipperCountry,
+                shipperCity:orderRequest.shipper.address.shipperCity,
+                shipperPostcode:orderRequest.shipper.address.shipperPostcode,
+              }
+            },
+            consignee:{
+              create:{
+                consigneeCountry:orderRequest.consignee.address.consigneeCountry,
+                consigneeCity:orderRequest.consignee.address.consigneeCity,
+                consigneePostcode:orderRequest.consignee.address.consigneePostcode,
+              }
+            },
+            shipperPickupOn:orderRequest.shipper.shipperPickupOn,
+            consigneeDeliverOn:new Date(orderRequest.consignee.consigneeDeliveryOn),
+            distance:routeDistance,
+            price:price,
+            quoteId: uuidv4(),
+            placedAt:moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+            status:"QUOTED"
           },
-          consignee:{
-            create:{
-              consigneeCountry:orderRequest.consignee.address.consigneeCountry,
-              consigneeCity:orderRequest.consignee.address.consigneeCity,
-              consigneePostcode:orderRequest.consignee.address.consigneePostcode,
-            }
-          },
-          shipperPickupOn:orderRequest.shipper.shipperPickupOn,
-          distance: routeDistance,
-          price: price,
-          quoteId: uuidv5(JSON.stringify(orderRequest), uuidv5.URL),
-          updatedAt: new Date(),
-          createdAt: new Date(),
-          status: "QUOTED",
-          requestOrigin: req.headers.origin || "",
-          lastModifiedBy: "SYSTEM",
-          lastModifiedAt: new Date(),
-        },
-      });
+        });
+      }catch(error){
+        console.log(error)
+      }
 
-      res.status(200).send();
+      res.status(200).send(orderObject);
     } catch (error) {
       logger.error("Quotation Service Error", error);
       res.status(500).send("Internal Server Error");

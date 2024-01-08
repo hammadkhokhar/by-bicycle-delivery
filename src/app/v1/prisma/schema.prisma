@@ -17,36 +17,37 @@ enum OrderStatus {
 }
 
 model Order {
-  id                 Int           @id @default(autoincrement())
-  quoteId            String        @unique
+  id                 Int           @id @default(autoincrement()) 
+  quoteId            String        @unique @db.Uuid
   shipper            Shipper       @relation(fields: [shipperId], references: [id])
   shipperId          Int
   consignee          Consignee     @relation(fields: [consigneeId], references: [id])
   consigneeId        Int
-  shipperPickupOn    DateTime
-  consigneeDeliverOn DateTime
+  shipperPickupOn    DateTime      @map(name: "shipper_pickup_on") @db.Timestamptz
+  consigneeDeliverOn DateTime      @map(name: "consignee_deliver_on") @db.Timestamptz
   distance           Float
   price              Float
-  placedAt           DateTime
+  placedAt           DateTime      @map(name: "placed_at") @db.Timestamptz
   status             OrderStatus
-  request_origin     String
   lastModifiedBy     String        @default("system")
-  lastModifiedAt     DateTime      @default(now())
-  createdAt          DateTime      @default(now())
+  lastModifiedAt     DateTime      @default(now()) @map(name: "last_modified_at") @db.Timestamptz
+  createdAt          DateTime      @default(now()) @map(name: "created_at") @db.Timestamptz
 }
 
 model Shipper {
   id              Int     @id @default(autoincrement())
-  shipperCountry  String
-  shipperCity     String
-  shipperPostcode String
+  shipperCountry  String  @map(name: "shipper_country")
+  shipperCity     String  @map(name: "shipper_city")
+  shipperPostcode String  @map(name: "shipper_postcode")
   orders          Order[] // One-to-many relationship with Order
+  createdAt       DateTime @default(now()) @map(name: "created_at") @db.Timestamptz
 }
 
 model Consignee {
   id                Int     @id @default(autoincrement())
-  consigneeCountry  String
-  consigneeCity     String
-  consigneePostcode String
+  consigneeCountry  String  @map(name: "consignee_country")
+  consigneeCity     String  @map(name: "consignee_city")
+  consigneePostcode String  @map(name: "consignee_postcode")
   orders            Order[] // One-to-many relationship with Order
+  createdAt         DateTime @default(now()) @map(name: "created_at") @db.Timestamptz
 }
