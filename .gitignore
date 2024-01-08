@@ -3,3 +3,4 @@ dist/
 *.env*
 *.lock
 *.log
+.DS_Store

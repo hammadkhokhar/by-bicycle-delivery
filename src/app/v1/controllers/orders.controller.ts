@@ -31,9 +31,9 @@ class OrdersController {
       method: req.method,
       body: req.body,
     });
+
     const cb = new CargoboardServices(); // Create an instance of CargoboardServices
     const orderRequest: IOrder = req.body; // Extract order information from the request body
-
     let price: number = 0;
 
     try {
@@ -50,7 +50,7 @@ class OrdersController {
       if (!routeDistanceValidation.success) {
         res.status(422).send({
           message:
-            "The current operational range exceeds our limits, which are set between 3km and 300km. ",
+            "The distance between the shipper and consignee is too far. Limit: 3-300km",
           distance: routeDistance,
           error: "Bad Request",
         });
@@ -60,17 +60,10 @@ class OrdersController {
       // calculate price
       price = await calculateDeliveryPrice(routeDistance);
 
-      // placed at with miliseconds and timezone
-      const orderObject = {
-        distance:routeDistance,
-        price:price,
-        quoteExpiry:moment().add(1, 'hour').valueOf(),
-        quoteId: uuidv4(),
-        status:"QUOTED",
-      }
-
       try{
-        // Order creation with quoted status
+        /**
+         * Save order(quotation) to database
+         */
         await prisma.order.create({
           data: {
             shipper:{
@@ -96,17 +89,35 @@ class OrdersController {
             status:"QUOTED"
           },
         });
-      }catch(error){
-        console.log(error)
-      }
 
-      res.status(200).send(orderObject);
+        /**
+         * Send response back to client
+         */
+        const responseBackToClient = {
+          distance:routeDistance,
+          price:price,
+          quoteExpiry:moment().add(1, 'hour').valueOf(),
+          quoteId: uuidv4(),
+          status:"QUOTED",
+        }
+
+        res.status(200).send(responseBackToClient);
+      } catch (error) {
+        logger.error("Order Creation", error);
+        res.status(500).send("Internal Server Error");
+      }
     } catch (error) {
-      logger.error("Quotation Service Error", error);
+      /**
+       * If any error occurs, log the error and send a 500 response.
+       */
+      logger.error("Order Quoation Endpoint", error);
       res.status(500).send("Internal Server Error");
     }
   }
 
+  /**
+   * Handles the request to create an order
+   */
   async processOrder(req: Request, res: Response): Promise<void> {
     logger.info("Request", {
       endpoint: req.originalUrl,
@@ -114,6 +125,67 @@ class OrdersController {
       body: req.body,
     });
     res.status(200).send("Order created");
+  }
+
+  /**
+   * Handles the request to retrieve an order
+   */
+  async getOrder(req: Request, res: Response): Promise<void> {
+    // Log request information
+    logger.info("Request", {
+      endpoint: req.originalUrl,
+      method: req.method,
+      body: req.body,
+    });
+
+    /**
+     * Get order from database
+     */
+    const order = await prisma.order.findFirst({
+      where: {
+        quoteId: req.params.quoteId,
+      },
+      include:{
+        shipper:true,
+        consignee:true
+      }
+    });
+
+    /**
+     * If order is not found, send error message
+     */
+    if (!order) {
+      res.status(404).send({
+        message: "Order not found",
+        error: "Not Found",
+      });
+      return;
+    }
+
+    /**
+     * Send response back to client
+     */
+    const responseBackToClient = {
+      shipper: {
+        shipperCountry: order.shipper.shipperCountry,
+        shipperCity: order.shipper.shipperCity,
+        shipperPostcode: order.shipper.shipperPostcode,
+      },
+      consignee: {
+        consigneeCountry: order.consignee.consigneeCountry,
+        consigneeCity: order.consignee.consigneeCity,
+        consigneePostcode: order.consignee.consigneePostcode,
+      },
+      shipperPickupOn: order.shipperPickupOn,
+      consigneeDeliverOn: order.consigneeDeliverOn,
+      distance: order.distance,
+      price: order.price,
+      quoteId: order.quoteId,
+      placedAt: order.placedAt,
+      status: order.status
+    };
+
+    res.status(200).send(responseBackToClient);
   }
 }
 
