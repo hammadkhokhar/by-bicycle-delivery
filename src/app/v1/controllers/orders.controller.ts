@@ -127,7 +127,7 @@ class OrdersController {
           status:"QUOTED",
         }
 
-        res.status(200).send(responseBackToClient);
+        res.status(201).send(responseBackToClient);
       } catch (error) {
         logger.error("Order Creation", error);
         res.status(500).send("Internal Server Error");
@@ -150,7 +150,49 @@ class OrdersController {
       method: req.method,
       body: req.body,
     });
-    res.status(200).send("Order created");
+
+    /**
+     * Get order from database
+     */
+    const getOrder = await prisma.order.findFirst({
+      where: {
+        quoteId: req.params.quotationId,
+        status: "QUOTED",
+      },
+      include:{
+        shipper:true,
+        consignee:true
+      }
+    });
+
+    /**
+     * If order is not found, send error message
+     */
+    if (!getOrder) {
+      res.status(404).send({
+        message: "Order not found",
+        error: "Not Found",
+      });
+      return;
+    }
+
+    /**
+     * Update order status
+     */
+    const updateOrder = await prisma.order.update({
+      where:{
+        quoteId: req.params.quotationId
+      },
+      data:{
+        status: "BOOKED"
+      }
+    });
+
+    res.status(200).send({
+      message: "Booking successful.",
+      quoteId: updateOrder.quoteId,
+      status: "BOOKED",
+    });
   }
 
   /**

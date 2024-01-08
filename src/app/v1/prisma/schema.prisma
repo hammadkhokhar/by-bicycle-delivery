@@ -9,7 +9,7 @@ datasource db {
 
 enum OrderStatus {
   QUOTED
-  PENDING
+  BOOKED
   AWAITING_PICKUP
   SHIPPED
   ENROUTE
