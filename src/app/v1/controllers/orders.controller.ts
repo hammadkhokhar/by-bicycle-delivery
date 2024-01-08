@@ -60,65 +60,64 @@ class OrdersController {
       price = await calculateDeliveryPrice(routeDistance);
       quoteExpiry = moment().add(1, "hour").format("YYYY-MM-DD HH:mm:ss")
 
-      // const orderObject:IOrderCreation = {
-      //   shipper:{
-      //     address:{
-      //       shipperCountry:orderRequest.shipper.address.shipperCountry,
-      //       shipperCity:orderRequest.shipper.address.shipperCity,
-      //       shipperPostcode:orderRequest.shipper.address.shipperPostcode,
-      //     },
-      //     shipperPickupOn:orderRequest.shipper.shipperPickupOn,
-      //   },
-      //   consignee:{
-      //     address:{
-      //       consigneeCountry:orderRequest.consignee.address.consigneeCountry,
-      //       consigneeCity:orderRequest.consignee.address.consigneeCity,
-      //       consigneePostcode:orderRequest.consignee.address.consigneePostcode,
-      //     },
-      //     consigneeDeliveryOn:orderRequest.consignee.consigneeDeliveryOn,
-      //   },
-      //   distance: routeDistance,
-      //   price: price,
-      //   quoteExpiry: new Date(quoteExpiry),
-      //   quoteId: uuidv5(JSON.stringify(orderRequest), uuidv5.URL),
-      //   updatedAt: new Date(),
-      //   createdAt: new Date(),
-      //   status: "QUOTATION",
-      //   requestOrigin: req.headers.origin || "",
-      //   lastModifiedBy: "SYSTEM",
-      //   lastModifiedAt: new Date(),
-      // }
+      const orderObject = {
+        shipper:{
+          address:{
+            shipperCountry:orderRequest.shipper.address.shipperCountry,
+            shipperCity:orderRequest.shipper.address.shipperCity,
+            shipperPostcode:orderRequest.shipper.address.shipperPostcode,
+          },
+          shipperPickupOn:orderRequest.shipper.shipperPickupOn,
+        },
+        consignee:{
+          address:{
+            consigneeCountry:orderRequest.consignee.address.consigneeCountry,
+            consigneeCity:orderRequest.consignee.address.consigneeCity,
+            consigneePostcode:orderRequest.consignee.address.consigneePostcode,
+          },
+          consigneeDeliveryOn:orderRequest.consignee.consigneeDeliveryOn,
+        },
+        distance: routeDistance,
+        price: price,
+        quoteExpiry: new Date(quoteExpiry),
+        quoteId: uuidv5(JSON.stringify(orderRequest), uuidv5.URL),
+        updatedAt: new Date(),
+        createdAt: new Date(),
+        status: "QUOTATION",
+        requestOrigin: req.headers.origin || "",
+        lastModifiedBy: "SYSTEM",
+        lastModifiedAt: new Date(),
+      }
 
-      // request entry
-      // await prisma.order.create({
-      //   data: {
-      //     shipper:{
-      //       create:{
-      //         shipperCountry:orderRequest.shipper.address.shipperCountry,
-      //         shipperCity:orderRequest.shipper.address.shipperCity,
-      //         shipperPostcode:orderRequest.shipper.address.shipperPostcode,
-      //       }
-      //     },
-      //     consignee:{
-      //       create:{
-      //         consigneeCountry:orderRequest.consignee.address.consigneeCountry,
-      //         consigneeCity:orderRequest.consignee.address.consigneeCity,
-      //         consigneePostcode:orderRequest.consignee.address.consigneePostcode,
-      //       }
-      //     },
-      //     shipperPickupOn:orderRequest.shipper.shipperPickupOn,
-      //     distance: routeDistance,
-      //     price: price,
-      //     quoteExpiry: new Date(quoteExpiry),
-      //     quoteId: uuidv5(JSON.stringify(orderRequest), uuidv5.URL),
-      //     updatedAt: new Date(),
-      //     createdAt: new Date(),
-      //     status: "QUOTATION",
-      //     requestOrigin: req.headers.origin || "",
-      //     lastModifiedBy: "SYSTEM",
-      //     lastModifiedAt: new Date(),
-      //   },
-      // });
+      // Quotation creation
+      await prisma.order.create({
+        data: {
+          shipper:{
+            create:{
+              shipperCountry:orderRequest.shipper.address.shipperCountry,
+              shipperCity:orderRequest.shipper.address.shipperCity,
+              shipperPostcode:orderRequest.shipper.address.shipperPostcode,
+            }
+          },
+          consignee:{
+            create:{
+              consigneeCountry:orderRequest.consignee.address.consigneeCountry,
+              consigneeCity:orderRequest.consignee.address.consigneeCity,
+              consigneePostcode:orderRequest.consignee.address.consigneePostcode,
+            }
+          },
+          shipperPickupOn:orderRequest.shipper.shipperPickupOn,
+          distance: routeDistance,
+          price: price,
+          quoteId: uuidv5(JSON.stringify(orderRequest), uuidv5.URL),
+          updatedAt: new Date(),
+          createdAt: new Date(),
+          status: "QUOTED",
+          requestOrigin: req.headers.origin || "",
+          lastModifiedBy: "SYSTEM",
+          lastModifiedAt: new Date(),
+        },
+      });
 
       res.status(200).send();
     } catch (error) {

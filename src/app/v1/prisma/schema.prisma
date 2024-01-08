@@ -18,6 +18,7 @@ enum OrderStatus {
 
 model Order {
   id                 Int           @id @default(autoincrement())
+  quoteId            String        @unique
   shipper            Shipper       @relation(fields: [shipperId], references: [id])
   shipperId          Int
   consignee          Consignee     @relation(fields: [consigneeId], references: [id])
