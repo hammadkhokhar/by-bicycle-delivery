@@ -1,4 +1,4 @@
-import logger from '../middleware/logger.middleware'
+import logger from '../utils/logger.util'
 import { IOrder } from '../interfaces/orders.interface'
 import axios, { AxiosRequestConfig } from 'axios'
 /**

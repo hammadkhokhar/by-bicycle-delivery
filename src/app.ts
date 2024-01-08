@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from 'express'
 import * as http from 'http'
 import cors from 'cors'
@@ -5,31 +6,34 @@ import path from 'path'
 import fs from 'fs'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
+import { Worker } from 'bullmq';
 import cluster from 'cluster'
 import debug from 'debug'
-import * as dotenv from 'dotenv'
-import errorHandler from './app/v1/middleware/error.middleware'
+import IORedis from 'ioredis';
+import { createClient } from "redis";
+let redisClient: any;
+import errorHandler from './app/v1/utils/error.util'
 import { CommonRoutesConfig } from './common/common.routes.config'
 import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
-dotenv.config()
+import logger from "./app/v1/utils/logger.util";
 
 // Check if the current process is the master process
-if (cluster.isPrimary) {
-  // Count the number of CPUs
-  const numCPUs = require('os').cpus().length
-  console.log(numCPUs)
-  // Fork workers based on the number of CPUs
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork()
-  }
+// if (cluster.isPrimary) {
+//   // Count the number of CPUs
+//   const numCPUs = require('os').cpus().length
+//   console.log(numCPUs)
+//   // Fork workers based on the number of CPUs
+//   for (let i = 0; i < numCPUs; i++) {
+//     cluster.fork()
+//   }
 
-  // Handle when a worker exits
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker ${worker.process.pid} died`)
-    // Replace the dead worker
-    cluster.fork()
-  })
-} else {
+//   // Handle when a worker exits
+//   cluster.on('exit', (worker, code, signal) => {
+//     console.log(`Worker ${worker.process.pid} died`)
+//     // Replace the dead worker
+//     cluster.fork()
+//   })
+// } else {
   const app: express.Application = express()
 
   // Create an HTTP server using the Express application
@@ -87,7 +91,24 @@ if (cluster.isPrimary) {
   app.use(errorHandler)
 
   // Start the HTTP server
-  server.listen(port, () => {
+  server.listen(port, async () => {
+    // Connect to Redis
+    console.log("Connecting to Redis...")
+    const redisOptions = {
+      host: process.env.REDIS_HOST || '127.0.0.1',
+      port: Number(process.env.REDIS_PORT) || 6379,
+      maxRetriesPerRequest: null,
+    };
+    const connection = new IORedis(redisOptions);
+    
+    /**
+     * Create a new worker to process jobs from the quote-queue
+     */
+    new Worker('quote-queue', async (job)=>{
+      logger.info("Worker received job", job.name, job.id);
+      await new Promise((resolve) => setTimeout(resolve, 12000)); // wait 12 seconds to comply with rate limit of distance service
+      logger.info("Worker processing job", job.name, job.id);
+    }, { connection });
     // Log configured routes
     routes.forEach((route: CommonRoutesConfig) => {
       debugLog(`Routes configured for ${route.getName()}`)
@@ -96,4 +117,4 @@ if (cluster.isPrimary) {
       `Server running at http://localhost:${port} - process ${process.pid}`,
     )
   })
-}
+// }

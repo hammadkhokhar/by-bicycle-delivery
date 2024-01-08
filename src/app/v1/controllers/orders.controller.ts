@@ -6,8 +6,13 @@ import moment from 'moment-timezone'
 moment.tz.setDefault('Europe/Berlin')
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
-import logger from '../middleware/logger.middleware'
+import logger from '../utils/logger.util'
 import { IOrder } from '../interfaces/orders.interface'
+import { Queue } from "bullmq";
+import IORedis from 'ioredis';
+const connection = new IORedis();
+const quoteQueue = new Queue("quote-queue", { connection });
+
 import {
   calculateDeliveryPrice,
   validateRouteRange,
@@ -26,9 +31,96 @@ class OrdersController {
   }
 
   /**
-   * Handles the request to get a quotation for an order.
+   * Queues the request to get a quotation for an order.
+   */
+  async queueQuotation(req: Request, res: Response): Promise<void> {
+    try{
+      // Add request to queue
+      const queueRes = await quoteQueue.add('Get Quote', req.body, {
+        jobId: uuidv4(),
+      })
+      // log queue response
+      logger.info('Queue Response', {
+        id: queueRes.id,
+        name: queueRes.name,
+        data: queueRes.data,
+        timestamp: queueRes.timestamp
+      })
+      // Send response back to client with queue position to check status
+      res.status(200).send({
+        message: 'We have received your request. Quote will be available once processed, you can check the status using the quote id.',
+        quoteId: queueRes.id,
+      });
+    } catch (error) {
+      console.error('Error adding to BullMQ queue:', error);
+      res.status(500).send({
+        message: 'Internal Server Error',
+      });
+    }
+  }
+
+  /**
+   * Get the status of queued request
    */
   async getQuotation(req: Request, res: Response): Promise<void> {
+    // Log request information
+    logger.info('Request', {
+      endpoint: req.originalUrl,
+      method: req.method,
+      body: req.body,
+    })
+
+    const quoteIdSchema = z.string().uuid()
+    const quoteIdValidation = quoteIdSchema.safeParse(req.params.quoteId)
+
+    // If quoteId is not uuid, send error message
+    if (!quoteIdValidation.success) {
+      res.status(422).send({
+        message: 'Invalid quote id',
+        error: 'Bad Request',
+      })
+      return
+    }
+
+    // Get queue status
+    const queueRes = await quoteQueue.getJob(req.params.quoteId)
+    await queueRes?.isCompleted().then((isCompleted) => {
+      if (isCompleted) {
+        res.status(200).send({
+          message: 'Quotation is ready.',
+          quoteId: queueRes?.id,
+          status: "Completed",
+        });
+      }
+    });
+    
+    // response if queue is not found
+    if (!queueRes) {
+      res.status(404).send({
+        message: 'No pending quote found.',
+        error: 'Not Found',
+      })
+      return
+    }else{
+      // get estimated time to complete
+      const pendingJobs = await quoteQueue.getJobCounts();
+      const estimatedTimeToComplete = pendingJobs.waiting * 12; // Each job has a delay of 12 seconds  
+      const estimatedTimeToCompleteTimestamp = moment().add(estimatedTimeToComplete, 'seconds').valueOf();
+      
+      // response if queue is found
+      res.status(200).send({
+        message: 'Quotation is being processed, please check back later.',
+        quoteId: queueRes.id,
+        estimatedCompletionTime: estimatedTimeToCompleteTimestamp,
+        status: "Pending",
+      });
+    }
+  }
+
+  /**
+   * Handles the request to get a quotation for an order.
+   */
+  async processQuotation(req: Request, res: Response): Promise<void> {
     // Log request information
     logger.info('Request', {
       endpoint: req.originalUrl,
@@ -198,7 +290,7 @@ class OrdersController {
       })
       return
     }
-    console.log(quoteIdValidation.data)
+
     /**
      * Get order from database
      */

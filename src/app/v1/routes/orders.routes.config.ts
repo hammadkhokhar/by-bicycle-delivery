@@ -1,7 +1,7 @@
 import { Application } from 'express'
 import { CommonRoutesConfig } from '../../../common/common.routes.config'
 import ordersController from '../controllers/orders.controller'
-import validationMiddleware from '../middleware/validation/order.validation'
+import validationMiddleware from '../middleware/order.validation'
 
 /**
  * Class representing routes related to orders.
@@ -31,7 +31,13 @@ export class OrdersRoutes extends CommonRoutesConfig {
       .route(`${routePrefix}/quote`)
       // validates all input fields in the request body
       .all(validationMiddleware.validateOrder())
-      .post(ordersController.getQuotation)
+      .post(ordersController.queueQuotation)
+
+    // Get quotation and booking
+    this.app
+      .route(`${routePrefix}/quote/:quoteId`)
+      .get(ordersController.getQuotation)
+      .post(ordersController.processQuotation)
 
     // Create order
     this.app

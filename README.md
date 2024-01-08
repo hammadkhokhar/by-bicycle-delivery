@@ -5,7 +5,6 @@
 - Install packages with `yarn install`
 - Make sure you have .env file in root folder and configured
 - Typescript is used in this project, so make sure you have typescript installed globally
-- Make sure you have nodemon installed globally
 
 ## <b> DB Setup </b>
 
@@ -16,5 +15,5 @@
 
 ## <b> Start </b>
 
-- Start app with `yarn start`
-- Start app in development mode with `yarn dev`
+- Start app with `yarn start` (builds and runs the app)
+- Start app in development mode with `yarn dev` (nodemon is used for hot reloading, so make sure you have it installed globally)
