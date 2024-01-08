@@ -137,13 +137,12 @@ class OrdersController {
       method: req.method,
       body: req.body,
     });
-
     /**
      * Get order from database
      */
     const order = await prisma.order.findFirst({
       where: {
-        quoteId: req.params.quoteId,
+        quoteId: req.params.quotationId,
       },
       include:{
         shipper:true,
@@ -181,7 +180,6 @@ class OrdersController {
       distance: order.distance,
       price: order.price,
       quoteId: order.quoteId,
-      placedAt: order.placedAt,
       status: order.status
     };
 

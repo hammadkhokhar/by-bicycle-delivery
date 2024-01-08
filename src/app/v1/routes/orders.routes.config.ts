@@ -39,6 +39,11 @@ export class OrdersRoutes extends CommonRoutesConfig {
       .all(validationMiddleware.validateOrder())
       .post(ordersController.processOrder);
 
+    // Get order status
+    this.app
+      .route(`${routePrefix}/:quotationId`)
+      .get(ordersController.getOrder);
+
     return this.app;
   }
 }
