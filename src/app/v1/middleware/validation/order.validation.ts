@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from "express";
  * Middleware for validating incoming requests.
  */
 class ValidationMiddleware {
+
   /**
    * Validates the body of a request against a given schema.
    * @returns A middleware function.
@@ -13,9 +14,6 @@ class ValidationMiddleware {
    
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const contentLength = req.headers['content-length'];
-        const contentLengthSchema = z.number().int().min(1).max(500, { message: "Body maximum length value exceeded. Please follow documenation." });
-        contentLengthSchema.parse(Number(contentLength));
         const allowedCountries = [
           "DE",
           "DK",
@@ -125,7 +123,6 @@ class ValidationMiddleware {
           }
         });
 
-        // Validate the request body against the schema
         const validatedData = await orderSchema.parseAsync(req.body);
         req.body = validatedData;
         next();

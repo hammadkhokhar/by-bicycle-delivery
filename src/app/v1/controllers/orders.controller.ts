@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Request, Response, response } from "express";
+import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import moment from 'moment-timezone';
 moment.tz.setDefault('Europe/Berlin');
@@ -50,7 +50,7 @@ class OrdersController {
       if (!routeDistanceValidation.success) {
         res.status(422).send({
           message:
-            "The distance between the shipper and consignee is too far. Limit: 3-300km",
+            "The distance between the shipper and consignee is not in operational range.",
           distance: routeDistance,
           error: "Bad Request",
         });
