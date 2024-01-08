@@ -28,6 +28,6 @@ export async function validateRouteRange(distance: number) {
   const validatedDistance = z
     .object({ distance: z.number().min(3).max(300) })
     .safeParse({ distance: distance });
-
+    
   return validatedDistance;
 }
