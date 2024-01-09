@@ -85,6 +85,26 @@ class ValidationMiddleware {
               })
             }
             /**
+             * Case: Orders placed before 10:30 may have pickup time of same day, but placed later have to be picked up next day or later.
+             */
+            const currentHour = moment().hour()
+            const currentMinute = moment().minute()
+            const cutoffHour = 10
+            const cutoffMinute = 30
+            const pickupDateIsSameDay = pickupDate.isSame(moment(), 'day')
+            if (
+              pickupDateIsSameDay &&
+              (currentHour >= cutoffHour ||
+                (currentHour === cutoffHour && currentMinute >= cutoffMinute))
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message:
+                  'Orders placed after 10:30 must have pickup time on the next day or later.',
+                path: ['shipper', 'shipperPickupOn'],
+              })
+            }
+            /**
              * Case: Pickup date must be in the future and format must be YYYY-MM-DDTHH:mm:ssZ.
              */
             const parsedPickupDateTime = new Date(value.shipper.shipperPickupOn)
