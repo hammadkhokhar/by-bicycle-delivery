@@ -60,7 +60,7 @@ export async function processQuotation(
   try {
     // Step 1: Get Distance
     let routeDistance = await cb.getDistance(orderRequest)
-    routeDistance=50
+
     // Step 2: Distance validation
     let routeDistanceValidation = await validateRouteRange(routeDistance)
 
