@@ -2,14 +2,12 @@ import 'dotenv/config'
 import express from 'express'
 import * as http from 'http'
 import cors from 'cors'
-import path from 'path'
-import fs from 'fs'
-import swaggerJSDoc from 'swagger-jsdoc'
-import swaggerUi from 'swagger-ui-express'
 import { Worker } from 'bullmq'
 import { processQuotation } from './app/v1/helper/orders.helper'
 import cluster from 'cluster'
+import { setupSwagger } from './app/v1/helper/swagger.helper'
 import debug from 'debug'
+import swaggerUi from 'swagger-ui-express'
 import IORedis from 'ioredis'
 import errorHandler from './app/v1/utils/error.util'
 import { CommonRoutesConfig } from './common/common.routes.config'
@@ -49,32 +47,11 @@ app.use(express.json()) // Parse incoming JSON requests
 app.use(express.urlencoded({ extended: false })) // Parse URL-encoded requests
 app.use(cors()) // Enable Cross-Origin Resource Sharing (CORS)
 
-// Define an array of paths to your Swagger JSON files
-const swaggerJsonPaths: string[] = [path.resolve(__dirname, 'docs/order.json')]
-
-// Read and merge Swagger JSON files
-const swaggerDefinitions: Array<swaggerJSDoc.SwaggerDefinition> =
-  swaggerJsonPaths.map((jsonPath) => {
-    return JSON.parse(fs.readFileSync(jsonPath, 'utf8'))
-  })
-
-// Combine the definitions
-const mergedSwaggerDefinition: swaggerJSDoc.SwaggerDefinition = Object.assign(
-  {},
-  ...swaggerDefinitions,
-)
-
-// Options for the swagger docs
-const options: swaggerJSDoc.Options = {
-  swaggerDefinition: mergedSwaggerDefinition,
-  apis: ['./src/app/v1/routes/*.ts'],
-}
-
-// Initialize swagger-jsdoc
-const swaggerSpec = swaggerJSDoc(options)
+// Set up Swagger
+const swaggerDocument = setupSwagger(app);
 
 // Set up Swagger UI endpoint
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Configure Routes
 const routes: CommonRoutesConfig[] = [new OrdersRoutes(app)] // Initialize the routes

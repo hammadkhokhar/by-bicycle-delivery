@@ -96,6 +96,7 @@ class OrdersController {
         return
       }
       res.status(200).send({
+        message: 'Quotation is ready.',
         quoteId: quoteDetails.quoteId,
         shipper: {
           shipperCountry: quoteDetails.shipper.shipperCountry,

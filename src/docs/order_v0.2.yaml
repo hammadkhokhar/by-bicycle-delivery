@@ -1,0 +1,361 @@
+openapi: 3.0.0
+info:
+  title: by-bicycle-delivery
+  version: 1.0.0
+tags:
+  - name: v1
+    description: Version 1
+  - name: v1 > Orders
+    description: Getting started with orders
+paths:
+  /orders/quote:
+    post:
+      tags:
+        - v1 > Orders
+      summary: Request Quote
+      description: |
+        This endpoint allows you to create a new quote for an order.
+        The HTTP POST request should be sent to localhost:3000/api/v1/orders/quote with the required payload in the raw request body.
+
+        Distance range between shipper and destination is 3-300KM
+
+        There should be at least 2 days gap between pickup(expected) and shipment(expected) and max 7 days.
+
+        ## Request Body
+
+        | **Field** | **Type** | **Constraints** |
+        | --- | --- | --- |
+        | shipper.address.shipperCountry | string (length: 2) | Allowed values: 'DE', 'DK', 'PL', 'CZ', 'AT', 'CH', 'FR', 'BE', 'NL' |
+        | shipper.address.shipperCity | string |  |
+        | shipper.address.shipperPostcode | string |  |
+        | shipper.shipperPickupOn | string (datetime) | Format: 'YYYY-MM-DDTHH:00:00Z'. Pickup date must be in the future. Only whole hours allowed.  <br>  <br>Orders placed after 10:30 must be booked for next day or later.  <br>  <br>Pickup time is from when we can come to pickup and not exactly when we will pickup |
+        | consignee.address.consigneeCountry | string (length: 2) | Allowed values: 'DE', 'DK', 'PL', 'CZ', 'AT', 'CH', 'FR', 'BE', 'NL' |
+        | consignee.address.consigneeCity | string |  |
+        | consignee.address.consigneePostcode | string |  |
+        | consignee.consigneeDeliveryOn | date | Format: 'YYYY-MM-DD'. Must be at least 2 days after pickup and at most 7 days after pickup. No weekends allowed. |
+
+        ## Response
+
+        | **Field** | **Type** | **Description** |
+        | --- | --- | --- |
+        | message | string | A confirmation message indicating the receipt of the request. |
+        | quoteId | UUID | A unique identifier associated with the quote order. Use this to check the status of your quote order. |
+
+        Example Response:
+
+        ```json
+        {
+            "message": "We have received your request. Quote will be available once processed, you can check the status using the quote id.",
+            "quoteId": "3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd"
+        }
+        ```
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+
+  /orders/quote/{quoteId}:
+    get:
+      tags:
+        - v1 > Orders
+      summary: Get Quote
+      description: |
+        This endpoint retrieves the details of a specific order quotation identified by the provided quoteId.
+        The request should be made using an GET method to the specified URL.
+
+        The response will include information such as the quoteId, shipper details, consignee details, pickup and delivery dates, distance, price, and status of the quotation. The status could indicate that the quotation is being processed and to check back later, or it could provide the estimated completion time and the pending status. Additionally, the status "QUOTED" may be returned along with the price and distance information.
+
+        Please note that the response may vary based on the current status of the quotation.
+
+      parameters:
+        - name: quoteId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: UUID
+          example: 86fd1261-9032-479d-a35b-ae6cee567c65
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntityResponse'
+
+  /orders/{quoteId}:
+    post:
+      tags:
+        - v1 > Orders
+      summary: Book Quote
+      description: |
+        The endpoint allows you to create an order for a specific quote by making an HTTP POST request to localhost:3000/api/v1/orders/:quoteId.
+
+        The request body for this endpoint has an undefined type and was not provided in the last call.
+
+        ### Response
+
+        Upon a successful booking, the API will respond with a JSON object containing the following fields:
+
+        - "message": A message indicating the success of the booking process.
+        - "orderId": The ID of the created order.
+        - "quoteId": The ID of the quote associated with the order.
+        - "status": The status of the booking, which will be "BOOKED".
+
+      requestBody:
+        content: {}
+      parameters:
+        - name: quoteId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 3667b1dd-d24a-4ca2-bbc1-7f6e8836e7ddc
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntityResponse'
+
+  /orders/{orderId}:
+    get:
+      tags:
+        - v1 > Orders
+      summary: Retrieve Order
+      description: |
+        This endpoint retrieves the details of a specific order identified by the orderId parameter.
+        The request does not require a request body. The response contains information about the shipper, consignee, pickup and delivery dates, distance, price, quote ID, and status of the order.
+
+      parameters:
+        - name: orderId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 5a
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntityResponse'
+
+components:
+  schemas:
+    QuoteRequest:
+      type: object
+      properties:
+        shipper:
+          type: object
+          properties:
+            address:
+              $ref: '#/components/schemas/Address'
+            shipperPickupOn:
+              type: string
+              format: date-time
+          required:
+            - address
+          additionalProperties: false
+        consignee:
+          type: object
+          properties:
+            address:
+              $ref: '#/components/schemas/Address'
+            consigneeDeliveryOn:
+              type: string
+              format: date
+          required:
+            - address
+          additionalProperties: false
+      required:
+        - shipper
+        - consignee
+      additionalProperties: false
+    
+    Address:
+      type: object
+      properties:
+        shipperCountry:
+          type: string
+          maxLength: 2
+          enum: ['DE', 'DK', 'PL', 'CZ', 'AT', 'CH', 'FR', 'BE', 'NL']
+        shipperCity:
+          type: string
+        shipperPostcode:
+          type: string
+        consigneeCountry:
+          type: string
+          maxLength: 2
+          enum: ['DE', 'DK', 'PL', 'CZ', 'AT', 'CH', 'FR', 'BE', 'NL']
+        consigneeCity:
+          type: string
+        consigneePostcode:
+          type: string
+      required:
+        - shipperCountry
+        - shipperCity
+        - shipperPostcode
+        - consigneeCountry
+        - consigneeCity
+        - consigneePostcode
+      additionalProperties: false
+    
+    QuoteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        quoteId:
+          type: string
+          format: uuid
+      additionalProperties: false
+
+    UnprocessableEntityResponse:
+      type: object
+      properties:
+        errors:
+          type: object
+          properties:
+            issues:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  path:
+                    type: array
+                    items:
+                      type: string
+              required:
+                - code
+                - message
+                - path
+          required:
+            - issues
+        name:
+          type: string
+      required:
+        - errors
+        - name
+      additionalProperties: false
+
+    BookingResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        orderId:
+          type: integer
+        quoteId:
+          type: string
+          format: uuid
+        status:
+          type: string
+      additionalProperties: false
+
+    OrderResponse:
+      type: object
+      properties:
+        shipper:
+          $ref: '#/components/schemas/Address'
+        consignee:
+          $ref: '#/components/schemas/Address'
+        shipperPickupOn:
+          type: string
+          format: date-time
+        consigneeDeliverOn:
+          type: string
+          format: date-time
+        distance:
+          type: integer
+        price:
+          type: integer
+        quoteId:
+          type: string
+          format: uuid
+        status:
+          type: string
+      additionalProperties: false
+
+    NotFoundResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        error:
+          type: string
+      additionalProperties: false
+
+    BadRequestResponse:
+      type: object
+      properties:
+        errors:
+          type: object
+          properties:
+            issues:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  path:
+                    type: array
+                    items:
+                      type: string
+              required:
+                - code
+                - message
+                - path
+          required:
+            - issues
+        name:
+          type: string
+      additionalProperties: false
