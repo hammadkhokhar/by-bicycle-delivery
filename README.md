@@ -75,7 +75,7 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 
 ## <b> DB Setup </b>
 
-- Learn more about Prisma [here](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-typescript-postgres)
+- Learn more about Prisma-Postgresql setup [here](https://www.prisma.io/docs/orm/overview/databases/postgresql)
 - Install Postgresql or use a cloud service
 - Create a database
 - Add database URL to the `.env` file
@@ -102,7 +102,7 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 
 2. **CLI Command Setup:**
    - [x] Create a CLI command that, when executed after cloning from GitHub, sets up the solution on a local machine.
-   - [x] Include prompts for setting authorization parameters required by Cargoboard Distance during the CLI setup.
+   - [x] Include prompts for setting authorization parameters 
 
 3. **Caching Layer:**
    - [x] Implement a caching layer to check if any order is already present on the route on a given day.
