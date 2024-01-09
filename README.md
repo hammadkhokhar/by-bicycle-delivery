@@ -75,6 +75,7 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 
 ## <b> DB Setup </b>
 
+- Learn more about Prisma [here](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-typescript-postgres)
 - Install Postgresql or use a cloud service
 - Create a database
 - Add database url to `.env` file
@@ -99,27 +100,26 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
    - [x] Ensure the solution can handle as many client requests as possible within its processing and network resources.
    - [x] Implement a mechanism to queue and process requests efficiently.
 
-2. **Containerization:**
-   - [x] Dockerize the solution to ensure consistent and reproducible deployments across different environments.
-   - [x] Provide a Dockerfile for building the container.
-
-3. **CLI Command Setup:**
+2. **CLI Command Setup:**
    - [x] Create a CLI command that, when executed after cloning from GitHub, sets up the solution on a local machine.
    - [x] Include prompts for setting authorization parameters required by Cargoboard Distance during the CLI setup.
 
-4. **Caching Layer:**
+3. **Caching Layer:**
    - [x] Implement a caching layer to check if any order is already present on the route on a given day.
    - [x] Use an efficient caching mechanism to store and retrieve order information.
 
-5. **12-Factor Compliance:**
+4. **12-Factor Compliance:**
    - [x] Ensure the solution follows the principles of the 12-factor app, considering factors such as configuration, dependencies, and processes.
 
-6. **Unit Tests:**
+5. **Unit Tests:**
    - [x] Write and execute unit tests for critical components of the solution.
 
-7. **OpenAPI Schema Integration:**
+6. **OpenAPI Schema Integration:**
    - [x] Integrate the OpenAPI schema with a UI
    - [x] Facilitate manual testing by providing clear documentation on how to interact with and test the API.
 
-8. **Documentation:**
+7. **Documentation:**
    - [x] Provide comprehensive documentation for setting up, configuring, and maintaining the solution.
+
+8. **Containerization:**
+   - [ ] Tested the containerized solution locally.
