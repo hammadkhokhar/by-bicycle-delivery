@@ -8,10 +8,11 @@ const prisma = new PrismaClient()
 import logger from '../utils/logger.util'
 import { IOrder } from '../interfaces/orders.interface'
 import CargoboardServices from '../services/cargoboard.service'
+import { setRouteInRedis, checkRouteExistsInRedis } from './cache.helper'
 
 /**
  * Calculates the delivery price based on the route length.
- * 
+ *
  * @param routeLength - The length of the delivery route in kilometers.
  * @returns A promise that resolves to the calculated delivery price in EUR.
  */
@@ -31,7 +32,7 @@ export async function calculateDeliveryPrice(
 
 /**
  * Validates the length of a route.
- * 
+ *
  * @param routeLength The length of the route to be validated.
  * @returns A promise that resolves to a boolean indicating whether the route length is valid.
  */
@@ -45,20 +46,23 @@ export async function validateRouteRange(distance: number) {
 
 /**
  * Export an asynchronous function to process a quotation for an order
- * 
+ *
  * @param {IOrder} orderRequest - The order request object containing details of the shipment.
  * @returns {Promise<any>} A promise that resolves to the quotation response or an error.
  */
-export async function processQuotation(orderRequest: IOrder, quoteId: string): Promise<any> {
-  const cb = new CargoboardServices(); // Create an instance of CargoboardServices
-  let price: number = 0; // Initialize price variable
+export async function processQuotation(
+  orderRequest: IOrder,
+  quoteId: string,
+): Promise<any> {
+  const cb = new CargoboardServices() // Create an instance of CargoboardServices
+  let price: number = 0 // Initialize price variable
 
   try {
     // Step 1: Get Distance
-    let routeDistance = await cb.getDistance(orderRequest);
-
+    let routeDistance = await cb.getDistance(orderRequest)
+    routeDistance=50
     // Step 2: Distance validation
-    let routeDistanceValidation = await validateRouteRange(routeDistance);
+    let routeDistanceValidation = await validateRouteRange(routeDistance)
 
     // If distance validation fails, return an error message
     if (!routeDistanceValidation.success) {
@@ -69,40 +73,26 @@ export async function processQuotation(orderRequest: IOrder, quoteId: string): P
           distance: routeDistance,
           code: 422,
         },
-      };
+      }
     }
-
+    
     // Step 3: Calculate price
-    price = await calculateDeliveryPrice(routeDistance);
+    price = await calculateDeliveryPrice(routeDistance)
 
-    // Step 4: Check if there is an existing order with the same shipper, consignee, pickup date
-    const pickupDay = moment(orderRequest.shipper.shipperPickupOn).startOf(
-      'day',
-    );
-    const orderCount = await prisma.order.count({
-      where: {
-        shipperPickupOn: {
-          gte: pickupDay.toDate(),
-          lt: pickupDay.clone().add(1, 'day').toDate(),
-        },
-        shipper: {
-          shipperCountry: orderRequest.shipper.address.shipperCountry,
-          shipperCity: orderRequest.shipper.address.shipperCity,
-          shipperPostcode: orderRequest.shipper.address.shipperPostcode,
-        },
-        consignee: {
-          consigneeCountry: orderRequest.consignee.address.consigneeCountry,
-          consigneeCity: orderRequest.consignee.address.consigneeCity,
-          consigneePostcode: orderRequest.consignee.address.consigneePostcode,
-        },
-      },
-    });
+    // Step 4: Check if there is an existing order with the same shipper, consignee, pickup date, and delivery date in Redis
+    const pickupDateFormatted = moment(orderRequest.shipper.shipperPickupOn).format('YYYY-MM-DD');
+    const deliverDateFormatted = moment(orderRequest.consignee.consigneeDeliveryOn).format('YYYY-MM-DD');
+
+    const routeKey = `${orderRequest.shipper.address.shipperCountry}:${orderRequest.shipper.address.shipperCity}:${orderRequest.shipper.address.shipperPostcode}-to-${orderRequest.consignee.address.consigneeCountry}:${orderRequest.consignee.address.consigneeCity}:${orderRequest.consignee.address.consigneePostcode}-pickupOn-${pickupDateFormatted}-deliverOn-${deliverDateFormatted}`;
+
+    const existingOrderInRedis = await checkRouteExistsInRedis(routeKey);
 
     // If there is an existing order, apply a 10 EUR discount
-    price = orderCount > 0 ? price - 10 : price;
+    price = existingOrderInRedis ? price - 10 : price;
+ 
 
     // Step 5: Convert price to cents
-    price = price * 100;
+    price = price * 100
 
     /**
      * Step 6: Save order(quotation) to database
@@ -115,7 +105,7 @@ export async function processQuotation(orderRequest: IOrder, quoteId: string): P
         shipperCity: orderRequest.shipper.address.shipperCity,
         shipperPostcode: orderRequest.shipper.address.shipperPostcode,
       },
-    });
+    })
 
     // Step 6b: Check if consignee already exists in the database
     const existingConsignee = await prisma.consignee.findFirst({
@@ -124,7 +114,7 @@ export async function processQuotation(orderRequest: IOrder, quoteId: string): P
         consigneeCity: orderRequest.consignee.address.consigneeCity,
         consigneePostcode: orderRequest.consignee.address.consigneePostcode,
       },
-    });
+    })
 
     // Step 6c: Create order with quotation status
     const order = await prisma.order.create({
@@ -160,7 +150,12 @@ export async function processQuotation(orderRequest: IOrder, quoteId: string): P
         quoteId: quoteId,
         placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       },
-    });
+    })
+
+    // Step 6d: Store route information in Redis if it doesn't exist
+    if (!existingOrderInRedis) {
+      await setRouteInRedis(routeKey)
+    }
 
     // Step 7: Send response back to the client
     const responseBackToClient = {
@@ -169,12 +164,12 @@ export async function processQuotation(orderRequest: IOrder, quoteId: string): P
       quoteExpiry: moment().add(1, 'hour').valueOf(),
       quoteId: order.quoteId,
       status: 'QUOTED',
-    };
+    }
 
-    return responseBackToClient;
+    return responseBackToClient
   } catch (error) {
     // Step 8: Log the error
-    logger.error('Order Quotation Endpoint', error);
+    logger.error('Order Quotation Endpoint', error)
 
     // Step 9: Return an error response
     return {
@@ -182,21 +177,21 @@ export async function processQuotation(orderRequest: IOrder, quoteId: string): P
         message: 'Internal Server Error',
         code: 500,
       },
-    };
+    }
   }
 }
 
 // Adds a note to orders
-export async function addOrderNote(id: number, note: string){
+export async function addOrderNote(id: number, note: string) {
   // update order with note
   const order = await prisma.order.update({
     where: { id },
     data: {
       Note: {
         create: {
-          note
+          note,
         },
-      }
+      },
     },
   })
   logger.info('Order Note add for order id: ' + id)
@@ -204,7 +199,7 @@ export async function addOrderNote(id: number, note: string){
 
 /**
  * Retrieve a quotation (order) by its unique quote ID.
- * 
+ *
  * @param {string} id - The unique quote ID of the quotation to be retrieved.
  * @returns {Promise<any>} A promise that resolves to the retrieved quotation or null if not found.
  */
@@ -219,12 +214,12 @@ export async function getQuote(id: string): Promise<any> {
         shipper: true,
         consignee: true,
       },
-    });
+    })
     // Return the retrieved order (quotation)
-    return order;
+    return order
   } catch (error) {
     // Log any errors that occur during the process
-    logger.error('Get Quote', error);
+    logger.error('Get Quote', error)
 
     // Return an error response
     return {
@@ -232,6 +227,6 @@ export async function getQuote(id: string): Promise<any> {
         message: 'Internal Server Error',
         code: 500,
       },
-    };
+    }
   }
 }

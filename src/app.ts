@@ -15,7 +15,7 @@ import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
 import logger from './app/v1/utils/logger.util'
 
 // Create a new express application instance
-const app: express.Application = express() 
+const app: express.Application = express()
 
 // Create an HTTP server using the Express application
 const server: http.Server = http.createServer(app)
@@ -30,13 +30,13 @@ const debugLog: debug.IDebugger = debug('app')
 app.use(express.json()) // Parse incoming JSON requests
 app.use(express.urlencoded({ extended: false })) // Parse URL-encoded requests
 app.use(cors()) // Enable Cross-Origin Resource Sharing (CORS)
-app.disable('x-powered-by'); // Disable x-powered-by header
+app.disable('x-powered-by') // Disable x-powered-by header
 
 // Set up Swagger
-const swaggerDocument = setupSwagger(app);
+const swaggerDocument = setupSwagger(app)
 
 // Set up Swagger UI endpoint
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Configure Routes
 const routes: CommonRoutesConfig[] = [new OrdersRoutes(app)] // Initialize the routes
@@ -66,13 +66,13 @@ server.listen(port, async () => {
   new Worker(
     'quote-queue',
     async (job) => {
-      const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+      const delay = (ms: number) => new Promise((res) => setTimeout(res, ms))
       try {
-        logger.info('Worker received job', job.name, job.id);
-        await delay(12000); // delay for 12 seconds to avoid rate limiting with distance API
-        logger.info('Worker processing job', job.name, job.id);
-        const result = await processQuotation(job.data, job.id as string);
-        logger.info('Worker completed job', job.name, job.id);
+        logger.info('Worker received job', job.name, job.id)
+        await delay(12000) // delay for 12 seconds to avoid rate limiting with distance API
+        logger.info('Worker processing job', job.name, job.id)
+        const result = await processQuotation(job.data, job.id as string)
+        logger.info('Worker completed job', job.name, job.id)
         // check if error
         if (result.error) {
           // update order with error
@@ -82,21 +82,21 @@ server.listen(port, async () => {
             distance: result.error.distance,
             code: result.error.code,
             status: 'Contact us for more information',
-          });
+          })
         } else {
           await job.updateData({
             note: 'Quotation processed successfully',
             quoteId: result.quoteId,
             status: 'QUOTED',
-          });
+          })
         }
       } catch (error) {
         // Log and handle errors within the worker
-        logger.error('Error processing job', job.name, job.id, error);
+        logger.error('Error processing job', job.name, job.id, error)
       }
     },
     { connection },
-  );
+  )
 
   // Log configured routes
   routes.forEach((route: CommonRoutesConfig) => {

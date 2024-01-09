@@ -1,5 +1,3 @@
-
-
 # By Bicycle Delivery
 
 An advanced microservice transforming last-mile logistics. It offers seamless ordering features, including quotation and booking, enhancing efficiency in eco-friendly bicycle deliveries.
@@ -15,7 +13,7 @@ NodeJS is used as a runtime environment and Express as a framework. Typescript i
 
 HTTP CLIENT:
 
-![Axios](https://img.shields.io/badge/Axios-1.1.3-blue?style=for-the-badge&logo=axios&logoColor=white) 
+![Axios](https://img.shields.io/badge/Axios-1.1.3-blue?style=for-the-badge&logo=axios&logoColor=white)
 
 Used for making HTTP requests to Cargoboard Distance API
 
@@ -27,7 +25,7 @@ Redis is used for caching and BullMQ for background jobs. For in-memory operatio
 
 DATABASE:
 
-![Prisma](https://img.shields.io/badge/Prisma-5.7.1-blueviolet?style=for-the-badge&logo=prisma&logoColor=white) ![Postgresql](https://img.shields.io/badge/Postgresql-8.7.1-blue?style=for-the-badge&logo=postgresql&logoColor=white) 
+![Prisma](https://img.shields.io/badge/Prisma-5.7.1-blueviolet?style=for-the-badge&logo=prisma&logoColor=white) ![Postgresql](https://img.shields.io/badge/Postgresql-8.7.1-blue?style=for-the-badge&logo=postgresql&logoColor=white)
 
 Prisma is used as ORM and Postgresql as database. I prefer to used prisma due to its type safety and robustness. Helps in productivity and reduces boilerplate code.
 
@@ -37,16 +35,15 @@ TESTING:
 
 Supertest is used for testing HTTP requests and JEST is used for unit testing.
 
-
 DOCS:
 
 ![Swagger JSDoc](https://img.shields.io/badge/Swagger%20JSDoc-6.2.8-green?style=for-the-badge&logo=swagger&logoColor=white) ![Swagger UI Express](https://img.shields.io/badge/Swagger%20UI%20Express-5.0.0-green?style=for-the-badge&logo=swagger&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
 
-Swagger and Postman are used for documentation and testing API endpoints. Swagger JSDoc is used to generate swagger.json file and Swagger UI Express to serve Swagger UI. 
+Swagger and Postman are used for documentation and testing API endpoints. Swagger JSDoc is used to generate swagger.json file and Swagger UI Express to serve Swagger UI.
 
 Logging:
 
-![Winston](https://img.shields.io/badge/Winston-3.8.2-blue?style=for-the-badge&logo=winston&logoColor=white) 
+![Winston](https://img.shields.io/badge/Winston-3.8.2-blue?style=for-the-badge&logo=winston&logoColor=white)
 
 Winston is used for logging. Every request is logged in a file and also in console.
 
@@ -55,7 +52,6 @@ Validation:
 ![Zod](https://img.shields.io/badge/Zod-3.22.4-green?style=for-the-badge&logo=npm&logoColor=white)
 
 Zod is used for validation. It is a TypeScript-first schema declaration and validation library. It is used to validate request body, query params and path params.
-
 
 ## <b> App Setup </b>
 
@@ -91,8 +87,39 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 - Start app with `yarn start` (builds and runs the app)
 - Start app in development mode with `yarn dev` (nodemon is used for hot reloading, so make sure you have it installed globally)
 
-
 ## <b> API Documentation </b>
 
 - Swagger documentation is available at `/api-docs` endpoint
 - Postman collection is available at `docs` folder
+
+
+## <b> Features List </b>
+1. **Quota Limits Handling:**
+   - [x] Implement logic to respect the quota limits set by Cargoboard Distance (5 requests per minute) for requests made by By Bicycle Delivery.
+   - [x] Ensure the solution can handle as many client requests as possible within its processing and network resources.
+   - [x] Implement a mechanism to queue and process requests efficiently.
+
+2. **Containerization:**
+   - [x] Dockerize the solution to ensure consistent and reproducible deployments across different environments.
+   - [x] Provide a Dockerfile for building the container.
+
+3. **CLI Command Setup:**
+   - [x] Create a CLI command that, when executed after cloning from GitHub, sets up the solution on a local machine.
+   - [x] Include prompts for setting authorization parameters required by Cargoboard Distance during the CLI setup.
+
+4. **Caching Layer:**
+   - [x] Implement a caching layer to check if any order is already present on the route on a given day.
+   - [x] Use an efficient caching mechanism to store and retrieve order information.
+
+5. **12-Factor Compliance:**
+   - [x] Ensure the solution follows the principles of the 12-factor app, considering factors such as configuration, dependencies, and processes.
+
+6. **Unit Tests:**
+   - [x] Write and execute unit tests for critical components of the solution.
+
+7. **OpenAPI Schema Integration:**
+   - [x] Integrate the OpenAPI schema with a UI
+   - [x] Facilitate manual testing by providing clear documentation on how to interact with and test the API.
+
+8. **Documentation:**
+   - [x] Provide comprehensive documentation for setting up, configuring, and maintaining the solution.

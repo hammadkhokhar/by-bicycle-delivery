@@ -9,9 +9,7 @@ const prisma = new PrismaClient()
 import logger from '../utils/logger.util'
 import { Queue } from 'bullmq'
 
-import {
-  getQuote,
-} from '../helper/orders.helper'
+import { getQuote } from '../helper/orders.helper'
 
 /**
  * Controller class for handling orders-related requests.
@@ -88,7 +86,7 @@ class OrdersController {
     // Response if the job is completed
     if (isCompleted && queueRes?.data.status === 'QUOTED') {
       let quoteDetails = await getQuote(req.params.quoteId)
-      if(quoteDetails == null){
+      if (quoteDetails == null) {
         res.status(404).send({
           message: 'No quote found.',
           error: 'Not Found',
@@ -123,10 +121,10 @@ class OrdersController {
         error: 'Not Found',
       })
       return
-    } else if(queueRes.data.code === 422){
+    } else if (queueRes.data.code === 422) {
       res.status(422).send(queueRes.data)
       return
-    }else {
+    } else {
       // Get estimated time to complete based on the position of the job in the queue
       const waitingJobs = await quoteQueue.getWaiting()
       const position =

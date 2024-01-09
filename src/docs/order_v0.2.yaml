@@ -213,7 +213,7 @@ components:
         - shipper
         - consignee
       additionalProperties: false
-    
+
     Address:
       type: object
       properties:
@@ -241,7 +241,7 @@ components:
         - consigneeCity
         - consigneePostcode
       additionalProperties: false
-    
+
     QuoteResponse:
       type: object
       properties:
@@ -313,10 +313,10 @@ components:
           format: date-time
         distance:
           type: integer
-          description: "KMs"
+          description: 'KMs'
         price:
           type: integer
-          description: "CENTS"
+          description: 'CENTS'
         quoteId:
           type: string
           format: uuid

@@ -13,32 +13,32 @@ function handleError(
 ) {
   // Check if the error has a 'stack' property before logging
   if ('stack' in err) {
-    console.error(`Error caught: ${err.message}`);
-    console.error(`Stack trace: ${err.stack}`);
+    console.error(`Error caught: ${err.message}`)
+    console.error(`Stack trace: ${err.stack}`)
   }
 
-  let customError = err;
+  let customError = err
 
   if (!(err instanceof CustomError)) {
-    console.log(err.name);
+    console.log(err.name)
     switch (err.name) {
       case 'UnauthorizedError':
         customError = new CustomError(
           "Oh no, this is embarrassing. You're not allowed in here.",
           401,
-        );
-        break;
+        )
+        break
       case 'NotFoundError':
-        customError = new CustomError('Are you lost?', 404);
-        break;
+        customError = new CustomError('Are you lost?', 404)
+        break
       default:
-        customError = new CustomError('Internal Server Error', 500);
-        break;
+        customError = new CustomError('Internal Server Error', 500)
+        break
     }
   }
 
   // Set the response content type to JSON
-  res.status((customError as CustomError).status).json(customError);
+  res.status((customError as CustomError).status).json(customError)
 }
 
-export default handleError;
+export default handleError
