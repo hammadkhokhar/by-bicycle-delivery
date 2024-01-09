@@ -26,7 +26,7 @@ describe('OrdersRoutes', () => {
   /**
    * Get the status of the order
    */
-  describe('GET /api/v1/orders/:orderID', () => {
+  describe('GET /api/v1/orders/:orderId', () => {
     it('Should get the status of the order', async () => {
       const TEST_ORDER_ID = process.env.TEST_ORDER_ID // must be a valid quotationId from the database
       const response = await request(app).get(`/api/v1/orders/${TEST_ORDER_ID}`)

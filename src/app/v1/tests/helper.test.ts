@@ -95,6 +95,7 @@ describe('Quotation Processor', () => {
     axiosMock.mockResolvedValue(mockedDistanceResponseInvalid)
 
     const result = await processQuotation(orderRequest)
+    console.log(result)
     expect(result.error.code).toBe(422)
   })
 

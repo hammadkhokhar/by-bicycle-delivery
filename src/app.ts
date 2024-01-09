@@ -7,11 +7,10 @@ import fs from 'fs'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 import { Worker } from 'bullmq'
+import { processQuotation } from './app/v1/helper/orders.helper'
 import cluster from 'cluster'
 import debug from 'debug'
 import IORedis from 'ioredis'
-import { createClient } from 'redis'
-let redisClient: any
 import errorHandler from './app/v1/utils/error.util'
 import { CommonRoutesConfig } from './common/common.routes.config'
 import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
@@ -105,12 +104,38 @@ server.listen(port, async () => {
   new Worker(
     'quote-queue',
     async (job) => {
-      logger.info('Worker received job', job.name, job.id)
-      await new Promise((resolve) => setTimeout(resolve, 12000)) // wait 12 seconds to comply with rate limit of distance service
-      logger.info('Worker processing job', job.name, job.id)
+      const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+      try {
+        logger.info('Worker received job', job.name, job.id);
+        await delay(12000); // delay for 12 seconds to avoid rate limiting with distance API
+        logger.info('Worker processing job', job.name, job.id);
+        const result = await processQuotation(job.data, job.id as string);
+        logger.info('Worker completed job', job.name, job.id);
+        // check if error
+        if (result.error) {
+          // update order with error
+          await job.updateData({
+            note: result.error.message,
+            quoteId: result.quoteId,
+            distance: result.error.distance,
+            code: result.error.code,
+            status: 'Contact us for more information',
+          });
+        } else {
+          await job.updateData({
+            note: 'Quotation processed successfully',
+            quoteId: result.quoteId,
+            status: 'QUOTED',
+          });
+        }
+      } catch (error) {
+        // Log and handle errors within the worker
+        logger.error('Error processing job', job.name, job.id, error);
+      }
     },
     { connection },
-  )
+  );
+
   // Log configured routes
   routes.forEach((route: CommonRoutesConfig) => {
     debugLog(`Routes configured for ${route.getName()}`)

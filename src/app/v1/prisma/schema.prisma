@@ -17,37 +17,46 @@ enum OrderStatus {
 }
 
 model Order {
-  id                 Int           @id @default(autoincrement()) 
-  quoteId            String        @unique @db.Uuid
-  shipper            Shipper       @relation(fields: [shipperId], references: [id])
-  shipperId          Int
-  consignee          Consignee     @relation(fields: [consigneeId], references: [id])
-  consigneeId        Int
-  shipperPickupOn    DateTime      @map(name: "shipper_pickup_on") @db.Timestamptz
-  consigneeDeliverOn DateTime      @map(name: "consignee_deliver_on") @db.Timestamptz
+  id                 Int         @id @default(autoincrement())
+  quoteId            String      @unique @db.Uuid
+  shipper            Shipper     @relation(fields: [shipperId], references: [id])
+  shipperId          Int         @map("shipper_id")
+  consignee          Consignee   @relation(fields: [consigneeId], references: [id])
+  consigneeId        Int         @map("consignee_id")
+  shipperPickupOn    DateTime    @map(name: "shipper_pickup_on") @db.Timestamptz
+  consigneeDeliverOn DateTime    @map(name: "consignee_deliver_on") @db.Timestamptz
   distance           Float
   price              Float
-  placedAt           DateTime      @map(name: "placed_at") @db.Timestamptz
-  status             OrderStatus   @default(QUOTED)
-  lastModifiedBy     String        @default("system")
-  lastModifiedAt     DateTime      @default(now()) @map(name: "last_modified_at") @db.Timestamptz
-  createdAt          DateTime      @default(now()) @map(name: "created_at") @db.Timestamptz
+  placedAt           DateTime    @map(name: "placed_at") @db.Timestamptz
+  status             OrderStatus @default(QUOTED)
+  lastModifiedBy     String      @default("system")
+  lastModifiedAt     DateTime    @default(now()) @map(name: "last_modified_at") @db.Timestamptz
+  createdAt          DateTime    @default(now()) @map(name: "created_at") @db.Timestamptz
+  Note               Note[]
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  note      String
+  order     Order    @relation(fields: [orderId], references: [id]) // Many-to-one relationship with Order
+  orderId   Int      @map(name: "order_id")
+  createdAt DateTime @default(now()) @map(name: "created_at") @db.Timestamptz
 }
 
 model Shipper {
-  id              Int     @id @default(autoincrement())
-  shipperCountry  String  @map(name: "shipper_country")
-  shipperCity     String  @map(name: "shipper_city")
-  shipperPostcode String  @map(name: "shipper_postcode")
+  id              Int      @id @default(autoincrement())
+  shipperCountry  String   @map(name: "shipper_country")
+  shipperCity     String   @map(name: "shipper_city")
+  shipperPostcode String   @map(name: "shipper_postcode")
   orders          Order[] // One-to-many relationship with Order
   createdAt       DateTime @default(now()) @map(name: "created_at") @db.Timestamptz
 }
 
 model Consignee {
-  id                Int     @id @default(autoincrement())
-  consigneeCountry  String  @map(name: "consignee_country")
-  consigneeCity     String  @map(name: "consignee_city")
-  consigneePostcode String  @map(name: "consignee_postcode")
+  id                Int      @id @default(autoincrement())
+  consigneeCountry  String   @map(name: "consignee_country")
+  consigneeCity     String   @map(name: "consignee_city")
+  consigneePostcode String   @map(name: "consignee_postcode")
   orders            Order[] // One-to-many relationship with Order
   createdAt         DateTime @default(now()) @map(name: "created_at") @db.Timestamptz
 }

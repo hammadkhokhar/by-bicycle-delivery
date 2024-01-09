@@ -7,14 +7,11 @@ moment.tz.setDefault('Europe/Berlin')
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 import logger from '../utils/logger.util'
-import { IOrder } from '../interfaces/orders.interface'
 import { Queue } from 'bullmq'
 
 import {
-  calculateDeliveryPrice,
-  validateRouteRange,
+  getQuote,
 } from '../helper/orders.helper'
-import CargoboardServices from '../services/cargoboard.service'
 
 /**
  * Controller class for handling orders-related requests.
@@ -89,11 +86,32 @@ class OrdersController {
     const isCompleted = await queueRes?.isCompleted()
 
     // Response if the job is completed
-    if (isCompleted) {
+    if (isCompleted && queueRes?.data.status === 'QUOTED') {
+      let quoteDetails = await getQuote(req.params.quoteId)
+      if(quoteDetails == null){
+        res.status(404).send({
+          message: 'No quote found.',
+          error: 'Not Found',
+        })
+        return
+      }
       res.status(200).send({
-        message: 'Quotation is ready.',
-        quoteId: queueRes?.id,
-        status: 'Completed',
+        quoteId: quoteDetails.quoteId,
+        shipper: {
+          shipperCountry: quoteDetails.shipper.shipperCountry,
+          shipperCity: quoteDetails.shipper.shipperCity,
+          shipperPostcode: quoteDetails.shipper.shipperPostcode,
+        },
+        consignee: {
+          consigneeCountry: quoteDetails.consignee.consigneeCountry,
+          consigneeCity: quoteDetails.consignee.consigneeCity,
+          consigneePostcode: quoteDetails.consignee.consigneePostcode,
+        },
+        shipperPickupOn: quoteDetails.shipperPickupOn,
+        consigneeDeliverOn: quoteDetails.consigneeDeliverOn,
+        distance: quoteDetails.distance,
+        price: quoteDetails.price,
+        status: 'QUOTED',
       })
       return
     }
@@ -105,7 +123,10 @@ class OrdersController {
         error: 'Not Found',
       })
       return
-    } else {
+    } else if(queueRes.data.code === 422){
+      res.status(422).send(queueRes.data)
+      return
+    }else {
       // Get estimated time to complete based on the position of the job in the queue
       const waitingJobs = await quoteQueue.getWaiting()
       const position =
