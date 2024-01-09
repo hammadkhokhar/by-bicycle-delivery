@@ -37,7 +37,6 @@ export class OrdersRoutes extends CommonRoutesConfig {
     this.app
       .route(`${routePrefix}/quote/:quoteId`)
       .get(ordersController.getQuotation)
-      .post(ordersController.processQuotation)
 
     // Create order
     this.app

@@ -8,10 +8,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 import logger from '../utils/logger.util'
 import { IOrder } from '../interfaces/orders.interface'
-import { Queue } from "bullmq";
-import IORedis from 'ioredis';
-const connection = new IORedis();
-const quoteQueue = new Queue("quote-queue", { connection });
+import { Queue } from 'bullmq'
 
 import {
   calculateDeliveryPrice,
@@ -34,7 +31,8 @@ class OrdersController {
    * Queues the request to get a quotation for an order.
    */
   async queueQuotation(req: Request, res: Response): Promise<void> {
-    try{
+    const quoteQueue = new Queue('quote-queue')
+    try {
       // Add request to queue
       const queueRes = await quoteQueue.add('Get Quote', req.body, {
         jobId: uuidv4(),
@@ -44,18 +42,19 @@ class OrdersController {
         id: queueRes.id,
         name: queueRes.name,
         data: queueRes.data,
-        timestamp: queueRes.timestamp
+        timestamp: queueRes.timestamp,
       })
       // Send response back to client with queue position to check status
       res.status(200).send({
-        message: 'We have received your request. Quote will be available once processed, you can check the status using the quote id.',
+        message:
+          'We have received your request. Quote will be available once processed, you can check the status using the quote id.',
         quoteId: queueRes.id,
-      });
+      })
     } catch (error) {
-      console.error('Error adding to BullMQ queue:', error);
+      console.error('Error adding to BullMQ queue:', error)
       res.status(500).send({
         message: 'Internal Server Error',
-      });
+      })
     }
   }
 
@@ -63,6 +62,7 @@ class OrdersController {
    * Get the status of queued request
    */
   async getQuotation(req: Request, res: Response): Promise<void> {
+    const quoteQueue = new Queue('quote-queue')
     // Log request information
     logger.info('Request', {
       endpoint: req.originalUrl,
@@ -84,16 +84,20 @@ class OrdersController {
 
     // Get queue status
     const queueRes = await quoteQueue.getJob(req.params.quoteId)
-    await queueRes?.isCompleted().then((isCompleted) => {
-      if (isCompleted) {
-        res.status(200).send({
-          message: 'Quotation is ready.',
-          quoteId: queueRes?.id,
-          status: "Completed",
-        });
-      }
-    });
-    
+
+    // Check if the job is completed
+    const isCompleted = await queueRes?.isCompleted()
+
+    // Response if the job is completed
+    if (isCompleted) {
+      res.status(200).send({
+        message: 'Quotation is ready.',
+        quoteId: queueRes?.id,
+        status: 'Completed',
+      })
+      return
+    }
+
     // response if queue is not found
     if (!queueRes) {
       res.status(404).send({
@@ -101,171 +105,25 @@ class OrdersController {
         error: 'Not Found',
       })
       return
-    }else{
-      // get estimated time to complete
-      const pendingJobs = await quoteQueue.getJobCounts();
-      const estimatedTimeToComplete = pendingJobs.waiting * 12; // Each job has a delay of 12 seconds  
-      const estimatedTimeToCompleteTimestamp = moment().add(estimatedTimeToComplete, 'seconds').valueOf();
-      
-      // response if queue is found
+    } else {
+      // Get estimated time to complete based on the position of the job in the queue
+      const waitingJobs = await quoteQueue.getWaiting()
+      const position =
+        waitingJobs.findIndex(
+          (waitingJob) => waitingJob.id === req.params.quoteId,
+        ) + 1
+      const estimatedTimeToComplete = position * 12 // Each job has a delay of 12 seconds
+      const estimatedTimeToCompleteTimestamp = moment()
+        .add(estimatedTimeToComplete, 'seconds')
+        .valueOf()
+
+      // Response if the job is pending
       res.status(200).send({
         message: 'Quotation is being processed, please check back later.',
         quoteId: queueRes.id,
         estimatedCompletionTime: estimatedTimeToCompleteTimestamp,
-        status: "Pending",
-      });
-    }
-  }
-
-  /**
-   * Handles the request to get a quotation for an order.
-   */
-  async processQuotation(req: Request, res: Response): Promise<void> {
-    // Log request information
-    logger.info('Request', {
-      endpoint: req.originalUrl,
-      method: req.method,
-      body: req.body,
-    })
-
-    const cb = new CargoboardServices() // Create an instance of CargoboardServices
-    const orderRequest: IOrder = req.body // Extract order information from the request body
-    let price: number = 0
-
-    try {
-      // Get Distance
-      let routeDistance = await cb.getDistance(orderRequest)
-
-      // Distance validation
-      let routeDistanceValidation = await validateRouteRange(routeDistance)
-
-      // If distance validation fails, send error message
-      if (!routeDistanceValidation.success) {
-        res.status(422).send({
-          message:
-            'The distance between the shipper and consignee is not in operational range.',
-          distance: routeDistance,
-          error: 'Bad Request',
-        })
-        return
-      }
-
-      // calculate price
-      price = await calculateDeliveryPrice(routeDistance)
-
-      try {
-        /**
-         * Check if there is an existing order with the same shipper, consignee, pickup date
-         */
-        const pickupDay = moment(orderRequest.shipper.shipperPickupOn).startOf(
-          'day',
-        )
-        const orderCount = await prisma.order.count({
-          where: {
-            shipperPickupOn: {
-              gte: pickupDay.toDate(),
-              lt: pickupDay.clone().add(1, 'day').toDate(),
-            },
-            shipper: {
-              shipperCountry: orderRequest.shipper.address.shipperCountry,
-              shipperCity: orderRequest.shipper.address.shipperCity,
-              shipperPostcode: orderRequest.shipper.address.shipperPostcode,
-            },
-            consignee: {
-              consigneeCountry: orderRequest.consignee.address.consigneeCountry,
-              consigneeCity: orderRequest.consignee.address.consigneeCity,
-              consigneePostcode:
-                orderRequest.consignee.address.consigneePostcode,
-            },
-          },
-        })
-
-        // If there is an existing order, apply a 10 EUR discount
-        price = orderCount > 0 ? price - 10 : price
-
-        // Convert price to cents
-        price = price * 100
-
-        /**
-         * Save order(quotation) to database
-         */
-        // Check if shipper already exist in database
-        const existingShipper = await prisma.shipper.findFirst({
-          where: {
-            shipperCountry: orderRequest.shipper.address.shipperCountry,
-            shipperCity: orderRequest.shipper.address.shipperCity,
-            shipperPostcode: orderRequest.shipper.address.shipperPostcode,
-          },
-        })
-
-        // Check if consignee already exist in database
-        const existingConsignee = await prisma.consignee.findFirst({
-          where: {
-            consigneeCountry: orderRequest.consignee.address.consigneeCountry,
-            consigneeCity: orderRequest.consignee.address.consigneeCity,
-            consigneePostcode: orderRequest.consignee.address.consigneePostcode,
-          },
-        })
-
-        // Create order with quotation status
-        const order = await prisma.order.create({
-          data: {
-            shipper: existingShipper
-              ? { connect: { id: existingShipper.id } } // Connect to existing shipper
-              : {
-                  // Create a new shipper if it doesn't exist
-                  create: {
-                    shipperCountry: orderRequest.shipper.address.shipperCountry,
-                    shipperCity: orderRequest.shipper.address.shipperCity,
-                    shipperPostcode:
-                      orderRequest.shipper.address.shipperPostcode,
-                  },
-                },
-            consignee: existingConsignee
-              ? { connect: { id: existingConsignee.id } } // Connect to existing consignee
-              : {
-                  // Create a new consignee if it doesn't exist
-                  create: {
-                    consigneeCountry:
-                      orderRequest.consignee.address.consigneeCountry,
-                    consigneeCity: orderRequest.consignee.address.consigneeCity,
-                    consigneePostcode:
-                      orderRequest.consignee.address.consigneePostcode,
-                  },
-                },
-            shipperPickupOn: orderRequest.shipper.shipperPickupOn,
-            consigneeDeliverOn: new Date(
-              orderRequest.consignee.consigneeDeliveryOn,
-            ),
-            distance: routeDistance,
-            price: price,
-            quoteId: uuidv4(),
-            placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-          },
-        })
-
-        /**
-         * Send response back to client
-         */
-        const responseBackToClient = {
-          distance: routeDistance,
-          price: price,
-          quoteExpiry: moment().add(1, 'hour').valueOf(),
-          quoteId: order.quoteId,
-          status: 'QUOTED',
-        }
-
-        res.status(201).send(responseBackToClient)
-      } catch (error) {
-        logger.error('Order Creation', error)
-        res.status(500).send('Internal Server Error')
-      }
-    } catch (error) {
-      /**
-       * If any error occurs, log the error and send a 500 response.
-       */
-      logger.error('Order Quoation Endpoint', error)
-      res.status(500).send('Internal Server Error')
+        status: 'Pending',
+      })
     }
   }
 
