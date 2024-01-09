@@ -150,7 +150,7 @@ class OrdersController {
   }
 
   /**
-   * Handles the request to create an order
+   * Handles the request to book an order
    */
   async processOrder(req: Request, res: Response): Promise<void> {
     logger.info('Request', {
@@ -192,17 +192,6 @@ class OrdersController {
       res.status(404).send({
         message: 'No active quotation found',
         error: 'Not Found',
-      })
-      return
-    }
-
-    /**
-     * If quotation has expired, send error message
-     */
-    if (moment(getOrder.placedAt).add(1, 'hour').isBefore(moment())) {
-      res.status(422).send({
-        message: 'Quote has expired, please request a new quote or contact us.',
-        error: 'Bad Request',
       })
       return
     }

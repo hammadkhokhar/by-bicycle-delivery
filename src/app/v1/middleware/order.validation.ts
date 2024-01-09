@@ -85,26 +85,6 @@ class ValidationMiddleware {
               })
             }
             /**
-             * Case: Orders placed before 10:30 may have pickup time of same day, but placed later have to be picked up next day or later.
-             */
-            const currentHour = moment().hour()
-            const currentMinute = moment().minute()
-            const cutoffHour = 10
-            const cutoffMinute = 30
-            const pickupDateIsSameDay = pickupDate.isSame(moment(), 'day')
-            if (
-              pickupDateIsSameDay &&
-              (currentHour >= cutoffHour ||
-                (currentHour === cutoffHour && currentMinute >= cutoffMinute))
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message:
-                  'Orders placed after 10:30 must have pickup time on the next day or later.',
-                path: ['shipper', 'shipperPickupOn'],
-              })
-            }
-            /**
              * Case: Pickup date must be in the future and format must be YYYY-MM-DDTHH:mm:ssZ.
              */
             const parsedPickupDateTime = new Date(value.shipper.shipperPickupOn)
@@ -124,16 +104,14 @@ class ValidationMiddleware {
             /**
              * Case: Pickup time must be between 8:00 and 18:00 and Allowed days are days from Monday till Friday
              */
-            const pickupDateHour = parsedPickupDateTime.getHours()
             const pickupDateDay = parsedPickupDateTime.getDay()
             const pickupDateIsWeekend =
               pickupDateDay === 0 || pickupDateDay === 6
-            const pickupDateIsAfter18 = pickupDateHour >= 18
-            if (pickupDateIsWeekend || pickupDateIsAfter18) {
+            if (pickupDateIsWeekend) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message:
-                  'Pickup time must be before 22:00 and Allowed days are days from Monday till Friday.',
+                  'Pickup allowed days are days from Monday till Friday.',
                 path: ['shipper', 'shipperPickupOn'],
               })
             }
