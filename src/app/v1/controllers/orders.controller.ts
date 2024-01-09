@@ -96,7 +96,6 @@ class OrdersController {
         return
       }
       res.status(200).send({
-        message: 'Quotation is ready.',
         quoteId: quoteDetails.quoteId,
         shipper: {
           shipperCountry: quoteDetails.shipper.shipperCountry,
@@ -112,7 +111,7 @@ class OrdersController {
         consigneeDeliverOn: quoteDetails.consigneeDeliverOn,
         distance: quoteDetails.distance,
         price: quoteDetails.price,
-        status: 'QUOTED',
+        status: quoteDetails.status,
       })
       return
     }
@@ -213,7 +212,7 @@ class OrdersController {
       message: 'Booking successful.',
       orderId: updateOrder.id,
       quoteId: updateOrder.quoteId,
-      status: 'BOOKED',
+      status: updateOrder.status,
     })
   }
 
