@@ -8,7 +8,7 @@ tags:
   - name: v1 > Orders
     description: Getting started with orders
 paths:
-  /orders/quote:
+  /api/v1/orders/quote:
     post:
       tags:
         - v1 > Orders
@@ -69,7 +69,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BadRequestResponse'
 
-  /orders/quote/{quoteId}:
+  /api/v1/orders/quote/{quoteId}:
     get:
       tags:
         - v1 > Orders
@@ -78,7 +78,7 @@ paths:
         This endpoint retrieves the details of a specific order quotation identified by the provided quoteId.
         The request should be made using an GET method to the specified URL.
 
-        The response will include information such as the quoteId, shipper details, consignee details, pickup and delivery dates, distance, price, and status of the quotation. The status could indicate that the quotation is being processed and to check back later, or it could provide the estimated completion time and the pending status. Additionally, the status "QUOTED" may be returned along with the price and distance information.
+        The response will include information such as the quoteId, shipper details, consignee details, pickup and delivery dates, distance, price(CENTS), and status of the quotation. The status could indicate that the quotation is being processed and to check back later, or it could provide the estimated completion time and the pending status. Additionally, the status "QUOTED" may be returned along with the price(CENTS) and distance information.
 
         Please note that the response may vary based on the current status of the quotation.
 
@@ -104,7 +104,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UnprocessableEntityResponse'
 
-  /orders/{quoteId}:
+  /api/v1/orders/{quoteId}:
     post:
       tags:
         - v1 > Orders
@@ -146,14 +146,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/UnprocessableEntityResponse'
 
-  /orders/{orderId}:
+  /api/v1/orders/{orderId}:
     get:
       tags:
         - v1 > Orders
       summary: Retrieve Order
       description: |
         This endpoint retrieves the details of a specific order identified by the orderId parameter.
-        The request does not require a request body. The response contains information about the shipper, consignee, pickup and delivery dates, distance, price, quote ID, and status of the order.
+        The request does not require a request body. The response contains information about the shipper, consignee, pickup and delivery dates, distance, price(CENTS), quote ID, and status of the order.
 
       parameters:
         - name: orderId
@@ -161,7 +161,7 @@ paths:
           schema:
             type: string
           required: true
-          example: 5a
+          example: 5
       responses:
         '200':
           description: OK
@@ -313,8 +313,10 @@ components:
           format: date-time
         distance:
           type: integer
+          description: "KMs"
         price:
           type: integer
+          description: "CENTS"
         quoteId:
           type: string
           format: uuid

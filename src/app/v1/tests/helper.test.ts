@@ -4,6 +4,7 @@ import {
   validateRouteRange,
 } from '../helper/orders.helper'
 import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 
 jest.mock('axios')
 
@@ -53,8 +54,6 @@ describe('Route Range Validator', () => {
   })
 })
 
-jest.mock('axios')
-
 /**
  * Quotation Processor
  */
@@ -94,8 +93,7 @@ describe('Quotation Processor', () => {
     // Mocked Axios response for the distance service
     axiosMock.mockResolvedValue(mockedDistanceResponseInvalid)
 
-    const result = await processQuotation(orderRequest)
-    console.log(result)
+    const result = await processQuotation(orderRequest, uuidv4())
     expect(result.error.code).toBe(422)
   })
 
@@ -110,7 +108,7 @@ describe('Quotation Processor', () => {
     axiosMock.mockResolvedValue(mockedDistanceResponseValid)
 
     // Test the processQuotation function
-    const result = await processQuotation(orderRequest)
+    const result = await processQuotation(orderRequest, uuidv4())
     expect(result.status).toBe('QUOTED')
   })
 })

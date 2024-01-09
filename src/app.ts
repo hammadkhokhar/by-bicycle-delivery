@@ -14,24 +14,8 @@ import { CommonRoutesConfig } from './common/common.routes.config'
 import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
 import logger from './app/v1/utils/logger.util'
 
-// Check if the current process is the master process
-// if (cluster.isPrimary) {
-//   // Count the number of CPUs
-//   const numCPUs = require('os').cpus().length
-//   console.log(numCPUs)
-//   // Fork workers based on the number of CPUs
-//   for (let i = 0; i < numCPUs; i++) {
-//     cluster.fork()
-//   }
-
-//   // Handle when a worker exits
-//   cluster.on('exit', (worker, code, signal) => {
-//     console.log(`Worker ${worker.process.pid} died`)
-//     // Replace the dead worker
-//     cluster.fork()
-//   })
-// } else {
-const app: express.Application = express()
+// Create a new express application instance
+const app: express.Application = express() 
 
 // Create an HTTP server using the Express application
 const server: http.Server = http.createServer(app)
@@ -46,6 +30,7 @@ const debugLog: debug.IDebugger = debug('app')
 app.use(express.json()) // Parse incoming JSON requests
 app.use(express.urlencoded({ extended: false })) // Parse URL-encoded requests
 app.use(cors()) // Enable Cross-Origin Resource Sharing (CORS)
+app.disable('x-powered-by'); // Disable x-powered-by header
 
 // Set up Swagger
 const swaggerDocument = setupSwagger(app);
@@ -121,4 +106,3 @@ server.listen(port, async () => {
     `Server running at http://localhost:${port} - process ${process.pid}`,
   )
 })
-// }

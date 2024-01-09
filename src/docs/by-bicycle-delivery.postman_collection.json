@@ -211,7 +211,7 @@
 										}
 									]
 								},
-								"description": "This endpoint retrieves the details of a specific order quotation identified by the provided quoteId. The request should be made using an GET method to the specified URL.\n\nThe response will include information such as the quoteId, shipper details, consignee details, pickup and delivery dates, distance, price, and status of the quotation. The status could indicate that the quotation is being processed and to check back later, or it could provide the estimated completion time and the pending status. Additionally, the status \"QUOTED\" may be returned along with the price and distance information.\n\nPlease note that the response may vary based on the current status of the quotation."
+								"description": "This endpoint retrieves the details of a specific order quotation identified by the provided quoteId. The request should be made using an GET method to the specified URL.\n\nThe response will include information such as the quoteId, shipper details, consignee details, pickup and delivery dates, distance, price(CENTS), and status of the quotation. The status could indicate that the quotation is being processed and to check back later, or it could provide the estimated completion time and the pending status. Additionally, the status \"QUOTED\" may be returned along with the price(CENTS) and distance information.\n\nPlease note that the response may vary based on the current status of the quotation."
 							},
 							"response": [
 								{
@@ -647,11 +647,11 @@
 									"variable": [
 										{
 											"key": "orderId",
-											"value": "5a"
+											"value": "4"
 										}
 									]
 								},
-								"description": "\nThis endpoint retrieves the details of a specific order identified by the orderId parameter. The request does not require a request body. The response contains information about the shipper, consignee, pickup and delivery dates, distance, price, quote ID, and status of the order.\n"
+								"description": "\nThis endpoint retrieves the details of a specific order identified by the orderId parameter. The request does not require a request body. The response contains information about the shipper, consignee, pickup and delivery dates, distance, price (CENTS), quote ID, and status of the order.\n"
 							},
 							"response": [
 								{
