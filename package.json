@@ -1,8 +1,8 @@
 {
-  "name": "bicycle-api",
+  "name": "by-bicycle-delivery",
   "version": "0.0.1",
   "license": "MIT",
-  "description": "Placing and persisting orders microservice",
+  "description": "An advanced microservice transforming last-mile logistics. It offers seamless ordering features, including quotation and booking.",
   "prisma": {
     "schema": "src/app/v1/prisma/schema.prisma"
   },
