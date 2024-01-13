@@ -11,7 +11,7 @@ import errorHandler from './app/v1/utils/error.util'
 import { CommonRoutesConfig } from './common/common.routes.config'
 import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
 import logger from './app/v1/utils/logger.util'
-import { createRedisConnection } from './app/v1/utils/redis.util'
+import redisClient from './app/v1/utils/redis.util'
 
 
 // Create a new express application instance
@@ -51,10 +51,8 @@ app.use(errorHandler)
 
 // Start the HTTP server
 server.listen(port, async () => {
-  // Redis connection
-  const redis = await createRedisConnection();
   // queue worker configuration
-  const queueProcessor = queueWorker(redis);
+  const queueProcessor = queueWorker(redisClient);
   queueProcessor.on('completed', (job) => {
     logger.info(`Job completed: ${job.id}`);
   });

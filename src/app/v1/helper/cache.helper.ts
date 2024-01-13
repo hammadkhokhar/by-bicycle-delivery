@@ -1,26 +1,5 @@
-import IORedis, { Redis } from 'ioredis';
-import { createRedisConnection } from '../utils/redis.util'; // Adjust the path accordingly
+import redisClient from '../utils/redis.util'; // Adjust the path accordingly
 import moment from 'moment';
-
-let redisClient: Redis | undefined;
-
-// Initialize the Redis connection
-const initializeRedisConnection = async (): Promise<void> => {
-  try {
-    const connection = await createRedisConnection();
-    redisClient = connection;
-    // Event handler for Redis errors.
-    redisClient.on('error', (err) => {
-      console.error('Redis Error:', err);
-    });
-  } catch (error) {
-    console.error('Error initializing Redis connection', error);
-    throw error;
-  }
-};
-
-// Ensure the Redis connection is initialized
-initializeRedisConnection();
 
 /**
  * Calculates the time-to-live (TTL) until the end of the day in seconds.

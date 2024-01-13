@@ -3,8 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import moment from 'moment-timezone'
 moment.tz.setDefault('Europe/Berlin')
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import prisma from '../utils/prisma.util'
 import logger from '../utils/logger.util'
 import { IOrder } from '../interfaces/orders.interface'
 import CargoboardServices from '../services/cargoboard.service'

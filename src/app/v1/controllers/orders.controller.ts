@@ -4,8 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import moment from 'moment-timezone'
 moment.tz.setDefault('Europe/Berlin')
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import prisma from '../utils/prisma.util'
 import logger from '../utils/logger.util'
 import { sendErrorResponse, sendSuccessResponse } from '../utils/api-errors.util'
 import { getQuote } from '../helper/orders.helper'
@@ -50,7 +49,7 @@ class OrdersController {
       })
 
       // log queue response
-      logger.info('Queue Response', { ...queueRes });
+      logger.info('Queue ID', { queueId: queueRes.id, requestID });
 
       sendErrorResponse(res, 200, 'We have received your request. Quote will be available once processed, you can check the status using the quote id.', { quoteId: queueRes.id })
     } catch (error) {
