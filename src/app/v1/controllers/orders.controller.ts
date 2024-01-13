@@ -218,10 +218,7 @@ class OrdersController {
     const orderId = req.params.orderId
 
     if (isNaN(Number(orderId))) {
-      res.status(422).send({
-        message: 'Invalid order id',
-        error: 'Bad Request',
-      })
+      sendErrorResponse(res, 422, 'Invalid order id', { error: 'Bad Request' })
       return
     }
 
@@ -242,10 +239,7 @@ class OrdersController {
      * If order is not found, send error message
      */
     if (!order) {
-      res.status(404).send({
-        message: 'Order not found',
-        error: 'Not Found',
-      })
+      sendErrorResponse(res, 404, 'Order not found', { error: 'Not Found' })
       return
     }
 
@@ -271,7 +265,7 @@ class OrdersController {
       status: order.status,
     }
 
-    res.status(200).send(responseBackToClient)
+    sendSuccessResponse(res, 200, 'Order Active', responseBackToClient)
   }
 }
 
