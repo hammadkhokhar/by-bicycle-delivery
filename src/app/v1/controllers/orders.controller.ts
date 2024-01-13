@@ -40,6 +40,9 @@ class OrdersController {
       body: req.body,
     })
 
+    // request id for logging
+    const requestID = uuidv4()
+
     try {
       // Add request to queue
       const queueRes = await quoteQueue.add('Get Quote', req.body, {
@@ -51,9 +54,8 @@ class OrdersController {
 
       sendErrorResponse(res, 200, 'We have received your request. Quote will be available once processed, you can check the status using the quote id.', { quoteId: queueRes.id })
     } catch (error) {
-      const errorId = uuidv4()
-      logger.error('Error adding to BullMQ queue:', error, errorId)
-      sendErrorResponse(res, 500, errorId, { error: 'Internal Server Error' })
+      logger.error('Error adding to BullMQ queue:', error, requestID)
+      sendErrorResponse(res, 500, requestID, { error: 'Internal Server Error' })
     }
   }
 
