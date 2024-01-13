@@ -11,6 +11,7 @@ import errorHandler from './app/v1/utils/error.util'
 import { CommonRoutesConfig } from './common/common.routes.config'
 import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
 import logger from './app/v1/utils/logger.util'
+import { createRedisConnection } from './app/v1/utils/redis.util'
 
 
 // Create a new express application instance
@@ -50,20 +51,8 @@ app.use(errorHandler)
 
 // Start the HTTP server
 server.listen(port, async () => {
-  // check redis connection
-  const redis = new IORedis({
-    host: process.env.REDIS_HOST,
-    password: process.env.REDIS_PASSWORD,
-    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : undefined,
-    maxRetriesPerRequest: null,
-  });
-    try {
-    await redis.ping()
-    logger.info('Redis connection established')
-  } catch (error) {
-    logger.error('Error establishing Redis connection', error)
-  }
-
+  // Redis connection
+  const redis = await createRedisConnection();
   // queue worker configuration
   const queueProcessor = queueWorker(redis);
   queueProcessor.on('completed', (job) => {
