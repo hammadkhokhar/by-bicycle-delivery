@@ -35,7 +35,7 @@ app.disable('x-powered-by') // Disable x-powered-by header
 const swaggerDocument = setupSwagger(app)
 
 // Set up Swagger UI endpoint
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Configure Routes
 const routes: CommonRoutesConfig[] = [new OrdersRoutes(app)] // Initialize the routes

@@ -87,7 +87,7 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 
 ## <b> API Documentation </b>
 
-- Swagger documentation is available at the `/api-docs` endpoint
+- Swagger documentation is available at the `/documentation` endpoint
 - Postman collection is available in the `docs` folder
 
 ## <b> Features List </b>
