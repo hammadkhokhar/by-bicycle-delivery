@@ -56,6 +56,7 @@ class ValidationMiddleware {
               consigneeDeliveryOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             }),
           })
+          .strict()
           .superRefine((value, ctx) => {
             /**
              * Case: when the difference is less than 2 or more than 7 days.
@@ -136,25 +137,20 @@ class ValidationMiddleware {
               })
             }
           })
-
-        const validatedData = await orderSchema.parseAsync(req.body)
-        req.body = validatedData
-        next()
+          
+        const validatedData = await orderSchema.parseAsync(
+          req.body
+        );
+        req.body = validatedData;
+        next();
       } catch (error) {
         if (error instanceof ZodError) {
-          const additionalProperties = error.errors.filter(
-            (err) => err.path.length === 1 && err.path[0] === '',
-          )
-          if (additionalProperties.length > 0) {
-            // Custom error message for additional properties
-            const errorMessage = `Invalid properties in request body: ${additionalProperties
-              .map((prop) => `"${prop.message}"`)
-              .join(', ')}`
-            return res.status(400).json({ error: errorMessage })
-          }
-
-          // Handle other ZodError cases
-          res.status(400).json({ errors: error })
+          // Handle ZodError cases 
+          const issues = error.issues.map((issue: ZodIssue) => ({
+            path: issue.path,
+            message: issue.message,
+          }))
+          res.status(400).json({ errors: issues })
         } else {
           const errorMessage = (error as Error).message
           res.status(400).json({ error: errorMessage })
