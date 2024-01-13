@@ -7,7 +7,7 @@ moment.tz.setDefault('Europe/Berlin')
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 import logger from '../utils/logger.util'
-import { Queue } from 'bullmq'
+import { sendErrorResponse, sendSuccessResponse } from '../utils/api-errors.util'
 import { getQuote } from '../helper/orders.helper'
 import { quoteQueue } from '../services/queue'
 
@@ -49,17 +49,11 @@ class OrdersController {
       // log queue response
       logger.info('Queue Response', { ...queueRes });
 
-      // Send response back to client with queue position to check status
-      res.status(200).send({
-        message:
-          'We have received your request. Quote will be available once processed, you can check the status using the quote id.',
-        quoteId: queueRes.id,
-      })
+      sendErrorResponse(res, 200, 'We have received your request. Quote will be available once processed, you can check the status using the quote id.', { quoteId: queueRes.id })
     } catch (error) {
-      console.error('Error adding to BullMQ queue:', error)
-      res.status(500).send({
-        message: 'Internal Server Error',
-      })
+      const errorId = uuidv4()
+      logger.error('Error adding to BullMQ queue:', error, errorId)
+      sendErrorResponse(res, 500, errorId, { error: 'Internal Server Error' })
     }
   }
 
@@ -79,10 +73,7 @@ class OrdersController {
 
     // If quoteId is not uuid, send error message
     if (!quoteIdValidation.success) {
-      res.status(422).send({
-        message: 'Invalid quote id',
-        error: 'Bad Request',
-      })
+      sendErrorResponse(res, 422, 'Invalid quote id', { error: 'Bad Request' })
       return
     }
 
@@ -96,10 +87,7 @@ class OrdersController {
     if (isCompleted && queueRes?.data.status === QuoteStatus.Quoted) {
       let quoteDetails = await getQuote(req.params.quoteId)
       if (quoteDetails == null) {
-        res.status(404).send({
-          message: 'No quote found.',
-          error: 'Not Found',
-        })
+        sendErrorResponse(res, 404, 'No active quotation found', { error: 'Not Found' })
         return
       }
       res.status(200).send({
@@ -125,10 +113,7 @@ class OrdersController {
 
     // response if queue is not found
     if (!queueRes) {
-      res.status(404).send({
-        message: 'No pending quote found.',
-        error: 'Not Found',
-      })
+      sendErrorResponse(res, 404, 'No active quotation found', { error: 'Not Found' })
       return
     } else if (queueRes.data.code === 422) {
       res.status(422).send(queueRes.data)
@@ -146,8 +131,7 @@ class OrdersController {
         .valueOf()
 
       // Response if the job is pending
-      res.status(200).send({
-        message: 'Quotation is being processed, please check back later.',
+      sendSuccessResponse(res, 200, 'Quotation is being processed, please check back later.', {
         quoteId: queueRes.id,
         estimatedCompletionTime: estimatedTimeToCompleteTimestamp,
         status: QuoteStatus.Pending,
@@ -170,10 +154,7 @@ class OrdersController {
 
     // If quoteId is not uuid, send error message
     if (!quoteIdValidation.success) {
-      res.status(422).send({
-        message: 'Invalid quote id',
-        error: 'Bad Request',
-      })
+      sendErrorResponse(res, 422, 'Invalid quote id', { error: 'Bad Request' })
       return
     }
 
@@ -195,10 +176,7 @@ class OrdersController {
      * If order is not found, send error message
      */
     if (!getOrder) {
-      res.status(404).send({
-        message: 'No active quotation found',
-        error: 'Not Found',
-      })
+      sendErrorResponse(res, 404, 'Order not found', { error: 'Not Found' })
       return
     }
 
@@ -217,8 +195,7 @@ class OrdersController {
     })
 
     // Send response back to client
-    res.status(200).send({
-      message: 'Booking successful.',
+    sendSuccessResponse(res, 200, 'Booking successful.', {
       orderId: updateOrder.id,
       quoteId: updateOrder.quoteId,
       status: updateOrder.status,
