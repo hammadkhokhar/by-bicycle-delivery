@@ -147,8 +147,7 @@ export async function processQuotation(
         ),
         distance: routeDistance,
         price: price,
-        quoteId: quoteId,
-        placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        quoteId: quoteId
       },
     })
 

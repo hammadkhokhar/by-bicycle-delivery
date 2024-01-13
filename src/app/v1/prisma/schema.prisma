@@ -27,7 +27,7 @@ model Order {
   consigneeDeliverOn DateTime    @map(name: "consignee_deliver_on") @db.Timestamptz
   distance           Float
   price              Float
-  placedAt           DateTime    @map(name: "placed_at") @db.Timestamptz
+  placedAt           DateTime?   @map(name: "placed_at") @db.Timestamptz
   status             OrderStatus @default(QUOTED)
   lastModifiedBy     String      @default("system")
   lastModifiedAt     DateTime    @default(now()) @map(name: "last_modified_at") @db.Timestamptz

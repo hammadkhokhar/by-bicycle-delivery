@@ -211,6 +211,8 @@ class OrdersController {
       },
       data: {
         status: QuoteStatus.Booked,
+        lastModifiedAt: new Date(),
+        placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ')
       },
     })
 
