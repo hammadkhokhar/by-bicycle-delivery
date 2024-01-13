@@ -8,8 +8,14 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 import logger from '../utils/logger.util'
 import { Queue } from 'bullmq'
-
 import { getQuote } from '../helper/orders.helper'
+
+// Enum for order status
+enum QuoteStatus {
+  Quoted = 'QUOTED',
+  Pending = 'PENDING',
+  Booked = 'BOOKED',
+}
 
 /**
  * Controller class for handling orders-related requests.
@@ -81,7 +87,7 @@ class OrdersController {
     const isCompleted = await queueRes?.isCompleted()
 
     // Response if the job is completed
-    if (isCompleted && queueRes?.data.status === 'QUOTED') {
+    if (isCompleted && queueRes?.data.status === QuoteStatus.Quoted) {
       let quoteDetails = await getQuote(req.params.quoteId)
       if (quoteDetails == null) {
         res.status(404).send({
@@ -138,7 +144,7 @@ class OrdersController {
         message: 'Quotation is being processed, please check back later.',
         quoteId: queueRes.id,
         estimatedCompletionTime: estimatedTimeToCompleteTimestamp,
-        status: 'Pending',
+        status: QuoteStatus.Pending,
       })
     }
   }
@@ -171,7 +177,7 @@ class OrdersController {
     const getOrder = await prisma.order.findFirst({
       where: {
         quoteId: quoteIdValidation.data,
-        status: 'QUOTED',
+        status: QuoteStatus.Quoted,
       },
       include: {
         shipper: true,
@@ -198,7 +204,7 @@ class OrdersController {
         quoteId: quoteIdValidation.data,
       },
       data: {
-        status: 'BOOKED',
+        status: QuoteStatus.Booked,
       },
     })
 
