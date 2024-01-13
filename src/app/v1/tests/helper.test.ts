@@ -66,10 +66,10 @@ describe('Quotation Processor', () => {
     shipper: {
       address: {
         shipperCountry: 'DE',
-        shipperCity: 'Potsdam',
+        shipperCity: 'Berlin',
         shipperPostcode: '10115',
       },
-      shipperPickupOn: '2024-01-09T20:00:00Z',
+      shipperPickupOn: '2024-01-16T20:00:00Z',
     },
     consignee: {
       address: {
@@ -77,7 +77,7 @@ describe('Quotation Processor', () => {
         consigneeCity: 'Słupsk',
         consigneePostcode: '76-200',
       },
-      consigneeDeliveryOn: '2024-01-23',
+      consigneeDeliveryOn: '2024-01-20',
     },
   }
 
