@@ -12,6 +12,7 @@ import { CommonRoutesConfig } from './common/common.routes.config'
 import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
 import logger from './app/v1/utils/logger.util'
 
+
 // Create a new express application instance
 const app: express.Application = express()
 

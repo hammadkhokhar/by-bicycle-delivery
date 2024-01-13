@@ -9,6 +9,7 @@ const prisma = new PrismaClient()
 import logger from '../utils/logger.util'
 import { Queue } from 'bullmq'
 import { getQuote } from '../helper/orders.helper'
+import { quoteQueue } from '../services/queue'
 
 // Enum for order status
 enum QuoteStatus {
@@ -21,8 +22,6 @@ enum QuoteStatus {
  * Controller class for handling orders-related requests.
  */
 class OrdersController {
-  private quoteQueue = new Queue('quote-queue');
-
   /**
    * Handles the request to get the status of the API.
    */
@@ -34,9 +33,16 @@ class OrdersController {
    * Queues the request to get a quotation for an order.
    */
   async queueQuotation(req: Request, res: Response): Promise<void> {
+    // Log request information
+    logger.info('Request', {
+      endpoint: req.originalUrl,
+      method: req.method,
+      body: req.body,
+    })
+
     try {
       // Add request to queue
-      const queueRes = await this.quoteQueue.add('Get Quote', req.body, {
+      const queueRes = await quoteQueue.add('Get Quote', req.body, {
         jobId: uuidv4(),
       })
 
@@ -81,7 +87,7 @@ class OrdersController {
     }
 
     // Get queue status
-    const queueRes = await this.quoteQueue.getJob(req.params.quoteId)
+    const queueRes = await quoteQueue.getJob(req.params.quoteId)
 
     // Check if the job is completed
     const isCompleted = await queueRes?.isCompleted()
@@ -129,7 +135,7 @@ class OrdersController {
       return
     } else {
       // Get estimated time to complete based on the position of the job in the queue
-      const waitingJobs = await this.quoteQueue.getWaiting()
+      const waitingJobs = await quoteQueue.getWaiting()
       const position =
         waitingJobs.findIndex(
           (waitingJob) => waitingJob.id === req.params.quoteId,

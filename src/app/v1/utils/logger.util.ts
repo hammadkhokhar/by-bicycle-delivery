@@ -10,9 +10,17 @@ const logger = createLogger({
     }),
     align(),
     json(),
-    printf(
-      (info) => `[${info.timestamp}] ${info.level}: ${JSON.stringify(info)}`,
-    ),
+    printf((info) => {
+      // Exclude circular references before stringifying
+      const sanitizedInfo = {
+        message: info.message,
+        method: info.method,
+        endpoint: info.endpoint,
+        body: info.body,
+      };
+
+      return `[${info.timestamp}] ${info.level}: ${JSON.stringify(sanitizedInfo)}`;
+    }),
   ),
   transports: [
     new transports.Console(),
