@@ -15,6 +15,8 @@ import { getQuote } from '../helper/orders.helper'
  * Controller class for handling orders-related requests.
  */
 class OrdersController {
+  private quoteQueue = new Queue('quote-queue');
+
   /**
    * Handles the request to get the status of the API.
    */
@@ -26,19 +28,15 @@ class OrdersController {
    * Queues the request to get a quotation for an order.
    */
   async queueQuotation(req: Request, res: Response): Promise<void> {
-    const quoteQueue = new Queue('quote-queue')
     try {
       // Add request to queue
-      const queueRes = await quoteQueue.add('Get Quote', req.body, {
+      const queueRes = await this.quoteQueue.add('Get Quote', req.body, {
         jobId: uuidv4(),
       })
+
       // log queue response
-      logger.info('Queue Response', {
-        id: queueRes.id,
-        name: queueRes.name,
-        data: queueRes.data,
-        timestamp: queueRes.timestamp,
-      })
+      logger.info('Queue Response', { ...queueRes });
+
       // Send response back to client with queue position to check status
       res.status(200).send({
         message:
@@ -57,7 +55,6 @@ class OrdersController {
    * Get the status of queued request
    */
   async getQuotation(req: Request, res: Response): Promise<void> {
-    const quoteQueue = new Queue('quote-queue')
     // Log request information
     logger.info('Request', {
       endpoint: req.originalUrl,
@@ -78,7 +75,7 @@ class OrdersController {
     }
 
     // Get queue status
-    const queueRes = await quoteQueue.getJob(req.params.quoteId)
+    const queueRes = await this.quoteQueue.getJob(req.params.quoteId)
 
     // Check if the job is completed
     const isCompleted = await queueRes?.isCompleted()
@@ -126,7 +123,7 @@ class OrdersController {
       return
     } else {
       // Get estimated time to complete based on the position of the job in the queue
-      const waitingJobs = await quoteQueue.getWaiting()
+      const waitingJobs = await this.quoteQueue.getWaiting()
       const position =
         waitingJobs.findIndex(
           (waitingJob) => waitingJob.id === req.params.quoteId,

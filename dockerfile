@@ -1,16 +1,11 @@
 # Use an official Node.js runtime as a parent image
-FROM node:20
+FROM node:alpine
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
 # Copy package.json and yarn.lock to the working directory
 COPY package.json yarn.lock ./
-
-# Install Yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && apt-get install -y yarn
 
 # Install project dependencies
 RUN yarn install

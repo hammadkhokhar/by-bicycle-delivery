@@ -52,14 +52,7 @@ app.use(errorHandler)
 // Start the HTTP server
 server.listen(port, async () => {
   // Connect to Redis
-  console.log('Connecting to Redis...')
-  const redisOptions = {
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: Number(process.env.REDIS_PORT) || 6379,
-    maxRetriesPerRequest: null,
-  }
-  const connection = new IORedis(redisOptions)
-
+  const connection = new IORedis({maxRetriesPerRequest: null})
   /**
    * Create a new worker to process jobs from the quote-queue
    */
