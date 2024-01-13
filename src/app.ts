@@ -51,8 +51,13 @@ app.use(errorHandler)
 // Start the HTTP server
 server.listen(port, async () => {
   // check redis connection
-  const redis = new IORedis({maxRetriesPerRequest: null})
-  try {
+  const redis = new IORedis({
+    host: process.env.REDIS_HOST,
+    password: process.env.REDIS_PASSWORD,
+    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : undefined,
+    maxRetriesPerRequest: null,
+  });
+    try {
     await redis.ping()
     logger.info('Redis connection established')
   } catch (error) {

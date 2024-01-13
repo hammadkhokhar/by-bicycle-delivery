@@ -69,9 +69,6 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 - Clone the repo
 - Run `yarn install` to install dependencies
 - Change `.env.example` to `.env` and add your environment variables
-- Run `yarn start` to start the app
-- Run `yarn dev` to start the app in development mode
-- Run `yarn test` to run tests
 
 ## <b> DB Setup </b>
 

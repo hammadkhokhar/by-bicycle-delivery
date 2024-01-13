@@ -16,11 +16,8 @@ COPY . .
 # Install Prisma Client
 RUN yarn prisma generate
 
-# Build the TypeScript code
-RUN yarn build
-
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 5000
 
 # Command to run the application
 CMD ["yarn", "start"]
