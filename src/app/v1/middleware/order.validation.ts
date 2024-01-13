@@ -1,6 +1,7 @@
 import { z, ZodError, ZodIssue } from 'zod'
 import moment from 'moment'
 import { Request, Response, NextFunction } from 'express'
+import { IOrder } from '../interfaces/orders.interface'
 /**
  * Middleware for validating incoming requests.
  */
@@ -11,6 +12,12 @@ class ValidationMiddleware {
    */
   validateOrder() {
     return async (req: Request, res: Response, next: NextFunction) => {
+      const payloadSizeInBytes = Buffer.from(JSON.stringify(req.body)).length;
+      // Check if the payload size exceeds a certain limit
+      if (payloadSizeInBytes > 300) {
+        res.status(400).json({ error: 'Request payload size is too large.' });
+        return;
+      }
       try {
         const allowedCountries = [
           'DE',
@@ -24,9 +31,9 @@ class ValidationMiddleware {
           'NL',
         ]
         const orderSchema = z
-          .object({
-            shipper: z.object({
-              address: z.object({
+          .strictObject({
+            shipper: z.strictObject({
+              address: z.strictObject({
                 shipperCountry: z
                   .string()
                   .length(2)
@@ -40,8 +47,8 @@ class ValidationMiddleware {
               }),
               shipperPickupOn: z.string().datetime(),
             }),
-            consignee: z.object({
-              address: z.object({
+            consignee: z.strictObject({
+              address: z.strictObject({
                 consigneeCountry: z
                   .string()
                   .length(2)
@@ -56,7 +63,6 @@ class ValidationMiddleware {
               consigneeDeliveryOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             }),
           })
-          .strict()
           .superRefine((value, ctx) => {
             /**
              * Case: when the difference is less than 2 or more than 7 days.
@@ -141,8 +147,10 @@ class ValidationMiddleware {
         const validatedData = await orderSchema.parseAsync(
           req.body
         );
-        req.body = validatedData;
-        next();
+
+          req.body = validatedData;
+          next();
+      
       } catch (error) {
         if (error instanceof ZodError) {
           // Handle ZodError cases 
