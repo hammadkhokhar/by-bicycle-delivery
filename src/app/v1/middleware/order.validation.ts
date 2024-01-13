@@ -12,11 +12,11 @@ class ValidationMiddleware {
    */
   validateOrder() {
     return async (req: Request, res: Response, next: NextFunction) => {
-      const payloadSizeInBytes = Buffer.from(JSON.stringify(req.body)).length;
+      const payloadSizeInBytes = Buffer.from(JSON.stringify(req.body)).length
       // Check if the payload size exceeds a certain limit
       if (payloadSizeInBytes > 300) {
-        res.status(400).json({ error: 'Request payload size is too large.' });
-        return;
+        res.status(400).json({ error: 'Request payload size is too large.' })
+        return
       }
       try {
         const allowedCountries = [
@@ -143,17 +143,14 @@ class ValidationMiddleware {
               })
             }
           })
-          
-        const validatedData = await orderSchema.parseAsync(
-          req.body
-        );
 
-          req.body = validatedData;
-          next();
-      
+        const validatedData = await orderSchema.parseAsync(req.body)
+
+        req.body = validatedData
+        next()
       } catch (error) {
         if (error instanceof ZodError) {
-          // Handle ZodError cases 
+          // Handle ZodError cases
           const issues = error.issues.map((issue: ZodIssue) => ({
             path: issue.path,
             message: issue.message,

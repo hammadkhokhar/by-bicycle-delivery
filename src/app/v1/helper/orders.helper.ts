@@ -74,21 +74,24 @@ export async function processQuotation(
         },
       }
     }
-    
+
     // Step 3: Calculate price
     price = await calculateDeliveryPrice(routeDistance)
 
     // Step 4: Check if there is an existing order with the same shipper, consignee, pickup date, and delivery date in Redis
-    const pickupDateFormatted = moment(orderRequest.shipper.shipperPickupOn).format('YYYY-MM-DD');
-    const deliverDateFormatted = moment(orderRequest.consignee.consigneeDeliveryOn).format('YYYY-MM-DD');
+    const pickupDateFormatted = moment(
+      orderRequest.shipper.shipperPickupOn,
+    ).format('YYYY-MM-DD')
+    const deliverDateFormatted = moment(
+      orderRequest.consignee.consigneeDeliveryOn,
+    ).format('YYYY-MM-DD')
 
-    const routeKey = `${orderRequest.shipper.address.shipperCountry}:${orderRequest.shipper.address.shipperCity}:${orderRequest.shipper.address.shipperPostcode}-to-${orderRequest.consignee.address.consigneeCountry}:${orderRequest.consignee.address.consigneeCity}:${orderRequest.consignee.address.consigneePostcode}-pickupOn-${pickupDateFormatted}-deliverOn-${deliverDateFormatted}`;
+    const routeKey = `${orderRequest.shipper.address.shipperCountry}:${orderRequest.shipper.address.shipperCity}:${orderRequest.shipper.address.shipperPostcode}-to-${orderRequest.consignee.address.consigneeCountry}:${orderRequest.consignee.address.consigneeCity}:${orderRequest.consignee.address.consigneePostcode}-pickupOn-${pickupDateFormatted}-deliverOn-${deliverDateFormatted}`
 
-    const existingOrderInRedis = await checkRouteExistsInRedis(routeKey);
+    const existingOrderInRedis = await checkRouteExistsInRedis(routeKey)
 
     // If there is an existing order, apply a 10 EUR discount
-    price = existingOrderInRedis ? price - 10 : price;
- 
+    price = existingOrderInRedis ? price - 10 : price
 
     // Step 5: Convert price to cents
     price = price * 100
@@ -146,7 +149,7 @@ export async function processQuotation(
         ),
         distance: routeDistance,
         price: price,
-        quoteId: quoteId
+        quoteId: quoteId,
       },
     })
 

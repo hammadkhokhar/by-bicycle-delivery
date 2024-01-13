@@ -17,9 +17,11 @@ const logger = createLogger({
         method: info.method,
         endpoint: info.endpoint,
         body: info.body,
-      };
+      }
 
-      return `[${info.timestamp}] ${info.level}: ${JSON.stringify(sanitizedInfo)}`;
+      return `[${info.timestamp}] ${info.level}: ${JSON.stringify(
+        sanitizedInfo,
+      )}`
     }),
   ),
   transports: [

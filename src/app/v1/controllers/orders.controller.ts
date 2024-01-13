@@ -6,7 +6,10 @@ import moment from 'moment-timezone'
 moment.tz.setDefault('Europe/Berlin')
 import prisma from '../utils/prisma.util'
 import logger from '../utils/logger.util'
-import { sendErrorResponse, sendSuccessResponse } from '../utils/api-errors.util'
+import {
+  sendErrorResponse,
+  sendSuccessResponse,
+} from '../utils/api-errors.util'
 import { getQuote } from '../helper/orders.helper'
 import { quoteQueue } from '../services/queue'
 
@@ -49,9 +52,14 @@ class OrdersController {
       })
 
       // log queue response
-      logger.info('Queue ID', { queueId: queueRes.id, requestID });
+      logger.info('Queue ID', { queueId: queueRes.id, requestID })
 
-      sendErrorResponse(res, 200, 'We have received your request. Quote will be available once processed, you can check the status using the quote id.', { quoteId: queueRes.id })
+      sendErrorResponse(
+        res,
+        200,
+        'We have received your request. Quote will be available once processed, you can check the status using the quote id.',
+        { quoteId: queueRes.id },
+      )
     } catch (error) {
       logger.error('Error adding to BullMQ queue:', error, requestID)
       sendErrorResponse(res, 500, requestID, { error: 'Internal Server Error' })
@@ -88,7 +96,9 @@ class OrdersController {
     if (isCompleted && queueRes?.data.status === QuoteStatus.Quoted) {
       let quoteDetails = await getQuote(req.params.quoteId)
       if (quoteDetails == null) {
-        sendErrorResponse(res, 404, 'No active quotation found', { error: 'Not Found' })
+        sendErrorResponse(res, 404, 'No active quotation found', {
+          error: 'Not Found',
+        })
         return
       }
       res.status(200).send({
@@ -114,7 +124,9 @@ class OrdersController {
 
     // response if queue is not found
     if (!queueRes) {
-      sendErrorResponse(res, 404, 'No active quotation found', { error: 'Not Found' })
+      sendErrorResponse(res, 404, 'No active quotation found', {
+        error: 'Not Found',
+      })
       return
     } else if (queueRes.data.code === 422) {
       res.status(422).send(queueRes.data)
@@ -132,11 +144,16 @@ class OrdersController {
         .valueOf()
 
       // Response if the job is pending
-      sendSuccessResponse(res, 200, 'Quotation is being processed, please check back later.', {
-        quoteId: queueRes.id,
-        estimatedCompletionTime: estimatedTimeToCompleteTimestamp,
-        status: QuoteStatus.Pending,
-      })
+      sendSuccessResponse(
+        res,
+        200,
+        'Quotation is being processed, please check back later.',
+        {
+          quoteId: queueRes.id,
+          estimatedCompletionTime: estimatedTimeToCompleteTimestamp,
+          status: QuoteStatus.Pending,
+        },
+      )
     }
   }
 
@@ -191,7 +208,7 @@ class OrdersController {
       data: {
         status: QuoteStatus.Booked,
         lastModifiedAt: new Date(),
-        placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ')
+        placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       },
     })
 

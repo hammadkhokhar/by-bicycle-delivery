@@ -13,7 +13,6 @@ import { OrdersRoutes } from './app/v1/routes/orders.routes.config'
 import logger from './app/v1/utils/logger.util'
 import redisClient from './app/v1/utils/redis.util'
 
-
 // Create a new express application instance
 const app: express.Application = express()
 
@@ -52,16 +51,16 @@ app.use(errorHandler)
 // Start the HTTP server
 server.listen(port, async () => {
   // queue worker configuration
-  const queueProcessor = queueWorker(redisClient);
+  const queueProcessor = queueWorker(redisClient)
   queueProcessor.on('completed', (job) => {
-    logger.info(`Job completed: ${job.id}`);
-  });
+    logger.info(`Job completed: ${job.id}`)
+  })
   queueProcessor.on('failed', (job, err) => {
-    logger.error(`Job failed: ${job?.id}`, err);
-  });
+    logger.error(`Job failed: ${job?.id}`, err)
+  })
 
-  logger.info('Queue worker configured and started');
-  
+  logger.info('Queue worker configured and started')
+
   // Log configured routes
   routes.forEach((route: CommonRoutesConfig) => {
     logger.info(`Routes configured for ${route.getName()}`)

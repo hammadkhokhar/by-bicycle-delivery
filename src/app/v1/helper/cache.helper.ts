@@ -1,14 +1,14 @@
-import redisClient from '../utils/redis.util'; // Adjust the path accordingly
-import moment from 'moment';
+import redisClient from '../utils/redis.util' // Adjust the path accordingly
+import moment from 'moment'
 
 /**
  * Calculates the time-to-live (TTL) until the end of the day in seconds.
  * @returns {number} The TTL in seconds.
  */
 function calculateTTLUntilEndOfDay(): number {
-  const now = moment();
-  const endOfDay = moment().endOf('day');
-  return endOfDay.diff(now, 'seconds');
+  const now = moment()
+  const endOfDay = moment().endOf('day')
+  return endOfDay.diff(now, 'seconds')
 }
 
 /**
@@ -19,26 +19,26 @@ function calculateTTLUntilEndOfDay(): number {
 function setRouteInRedis(routeKey: string): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!redisClient) {
-      reject(new Error('Redis client not initialized'));
-      return;
+      reject(new Error('Redis client not initialized'))
+      return
     }
 
     // Calculate the TTL until the end of the day
-    const ttlInSeconds = calculateTTLUntilEndOfDay();
+    const ttlInSeconds = calculateTTLUntilEndOfDay()
 
     // Check if redisClient is still defined after the null check
     if (redisClient) {
       redisClient.setex(routeKey, ttlInSeconds, 'routeExists', (err, reply) => {
         if (err) {
-          reject(err);
+          reject(err)
         } else {
-          resolve(reply || 'OK');
+          resolve(reply || 'OK')
         }
-      });
+      })
     } else {
-      reject(new Error('Redis client not initialized'));
+      reject(new Error('Redis client not initialized'))
     }
-  });
+  })
 }
 
 /**
@@ -49,19 +49,19 @@ function setRouteInRedis(routeKey: string): Promise<string> {
 function checkRouteExistsInRedis(routeKey: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     if (!redisClient) {
-      reject(new Error('Redis client not initialized'));
-      return;
+      reject(new Error('Redis client not initialized'))
+      return
     }
 
     redisClient
       .exists(routeKey)
       .then((reply) => {
-        resolve(reply === 1);
+        resolve(reply === 1)
       })
       .catch((err) => {
-        reject(err);
-      });
-  });
+        reject(err)
+      })
+  })
 }
 
-export { setRouteInRedis, checkRouteExistsInRedis };
+export { setRouteInRedis, checkRouteExistsInRedis }

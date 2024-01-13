@@ -90,32 +90,39 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 - Swagger documentation is available at the `/api-docs` endpoint
 - Postman collection is available in the `docs` folder
 
-
 ## <b> Features List </b>
+
 1. **Quota Limits Handling:**
+
    - [x] Implement logic to respect the quota limits set by Cargoboard Distance (5 requests per minute) for requests made by By Bicycle Delivery.
    - [x] Ensure the solution can handle as many client requests as possible within its processing and network resources.
    - [x] Implement a mechanism to queue and process requests efficiently.
 
 2. **CLI Command Setup:**
+
    - [x] Create a CLI command that, when executed after cloning from GitHub, sets up the solution on a local machine.
-   - [x] Include prompts for setting authorization parameters 
+   - [x] Include prompts for setting authorization parameters
 
 3. **Caching Layer:**
+
    - [x] Implement a caching layer to check if any order is already present on the route on a given day.
    - [x] Use an efficient caching mechanism to store and retrieve order information.
 
 4. **12-Factor Compliance:**
+
    - [x] Ensure the solution follows the principles of the 12-factor app, considering factors such as configuration, dependencies, and processes.
 
 5. **Unit Tests:**
+
    - [x] Write and execute unit tests for critical components of the solution.
 
 6. **OpenAPI Schema Integration:**
+
    - [x] Integrate the OpenAPI schema with a UI
    - [x] Facilitate manual testing by providing clear documentation on how to interact with and test the API.
 
 7. **Documentation:**
+
    - [x] Provide comprehensive documentation for setting up, configuring, and maintaining the solution.
 
 8. **Containerization:**
