@@ -1,0 +1,1012 @@
+{
+	"info": {
+		"_postman_id": "2a6210cd-91ef-4951-b4a6-c11939a39717",
+		"name": "By Bicycle Delivery",
+		"description": "An advanced microservice transforming last-mile logistics. It offers seamless ordering features, including quotation and booking.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11062062",
+		"_collection_link": "https://solar-meteor-809279.postman.co/workspace/Fiverr-Workspace~ea000122-2629-453b-b8e0-a0599b0efac6/collection/11062062-2a6210cd-91ef-4951-b4a6-c11939a39717?action=share&source=collection_link&creator=11062062"
+	},
+	"item": [
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Request Quote",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shipper\": {\n    \"address\": {\n      \"shipperCountry\": \"DE\",\n      \"shipperCity\": \"Berlin\",\n      \"shipperPostcode\": \"10115\"\n    },\n    \"shipperPickupOn\": \"2024-01-15T12:00:00Z\"\n  },\n  \"consignee\": {\n    \"address\": {\n      \"consigneeCountry\": \"PL\",\n      \"consigneeCity\": \"Słupsk\",\n      \"consigneePostcode\": \"76-200\"\n    },\n    \"consigneeDeliveryOn\": \"2024-01-18\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/{{prefix}}/orders/quote",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"{{prefix}}",
+								"orders",
+								"quote"
+							]
+						},
+						"description": "This endpoint allows you to create a new quote for an order.\n\nDistance range between shipper and destination is 3-300KM\n\n## Request Body\n\n| **Field** | **Type** | **Constraints** |\n| --- | --- | --- |\n| shipper.address.shipperCountry | string (length: 2) | Allowed values: 'DE', 'DK', 'PL', 'CZ', 'AT', 'CH', 'FR', 'BE', 'NL' |\n| shipper.address.shipperCity | string |  |\n| shipper.address.shipperPostcode | string |  |\n| shipper.shipperPickupOn | string (datetime) | Format: 'YYYY-MM-DDTHH:00:00Z'. Pickup date must be in the future. Only whole hours allowed.  <br>  <br>Orders placed after 10:30 must be booked for next day or later.  <br>  <br>Pickup time is from when we can come to pickup and not exactly when we will pickup |\n| consignee.address.consigneeCountry | string (length: 2) | Allowed values: 'DE', 'DK', 'PL', 'CZ', 'AT', 'CH', 'FR', 'BE', 'NL' |\n| consignee.address.consigneeCity | string |  |\n| consignee.address.consigneePostcode | string |  |\n| consignee.consigneeDeliveryOn | Date | Format: 'YYYY-MM-DD'. Must be at least 2 days after pickup and at most 7 days after pickup. No weekends allowed. |"
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"shipper\": {\n    \"address\": {\n      \"shipperCountry\": \"DE\",\n      \"shipperCity\": \"Berlin\",\n      \"shipperPostcode\": \"10115\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00Z\"\n  },\n  \"consignee\": {\n    \"address\": {\n      \"consigneeCountry\": \"PL\",\n      \"consigneeCity\": \"Słupsk\",\n      \"consigneePostcode\": \"76-200\"\n    },\n    \"consigneeDeliveryOn\": \"2024-01-13\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/quote/",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										"quote",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "178"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b2-GjFGl2/LC+v6sXWHZy7lfxWwYLc\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:15:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"We have received your request. Quote will be available once processed, you can check the status using the quote id.\",\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\"\n}"
+						},
+						{
+							"name": "Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"shipper\": {\n    \"address\": {\n      \"shipperCountry\": \"DE\",\n      \"shipperCity\": \"Berlin\",\n      \"shipperPostcode\": \"10115\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00Z\"\n  },\n  \"consignee\": {\n    \"address\": {\n      \"consigneeCountry\": \"PL\",\n      \"consigneeCity\": \"Słupsk\",\n      \"consigneePostcode\": \"76-200\"\n    },\n    \"consigneeDeliveryOn\": \"2024-01-03\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/quote",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										"quote"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "255"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"ff-7JIbqa41zTRqYfkDEVEvnmDNVCE\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 14 Jan 2024 09:28:32 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"errors\": [\n        {\n            \"path\": [\n                \"consignee\",\n                \"consigneeDeliveryOn\"\n            ],\n            \"message\": \"At least 2 days are required between expected pickup and delivery.\"\n        },\n        {\n            \"path\": [\n                \"shipper\",\n                \"shipperPickupOn\"\n            ],\n            \"message\": \"Format must be YYYY-MM-DDTHH:00:00Z and date must be in the future.\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Quote",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/{{prefix}}/orders/quote/:quoteId",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"{{prefix}}",
+								"orders",
+								"quote",
+								":quoteId"
+							],
+							"variable": [
+								{
+									"key": "quoteId",
+									"value": "f8ca95b7-1a14-4edc-b114-f80dfb727cbb",
+									"description": "UUID"
+								}
+							]
+						},
+						"description": "This endpoint retrieves the details of a specific order quotation identified by the provided quoteId.\n\nThe response will include information such as the quoteId, shipper details, consignee details, pickup and delivery dates, distance, price(CENTS), and status of the quotation. The status could indicate that the quotation is being processed and to check back later, or it could provide the estimated completion time and the pending status. Additionally, the status \"QUOTED\" may be returned along with the price(CENTS) and distance information.\n\nPlease note that the response may vary based on the current status of the quotation."
+					},
+					"response": [
+						{
+							"name": "Pending Quotation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/quote/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										"quote",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "f8ca95b7-1a14-4edc-b114-f80dfb727cbb",
+											"description": "UUID"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "176"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b0-qCX0tP1mG/7vvrD5Hs0Yz7QWtUQ\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 14 Jan 2024 09:29:16 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Quotation is being processed, please check back later.\",\n    \"quoteId\": \"f8ca95b7-1a14-4edc-b114-f80dfb727cbb\",\n    \"estimatedCompletionTime\": 1705224556537,\n    \"status\": \"PENDING\"\n}"
+						},
+						{
+							"name": "Successful Quotation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/quote/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										"quote",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd",
+											"description": "UUID"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "365"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"16d-WV4iQI46jS5szsHxV/8/LwCHUzc\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:19:41 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\",\n    \"shipper\": {\n        \"shipperCountry\": \"DE\",\n        \"shipperCity\": \"Potsdam\",\n        \"shipperPostcode\": \"10115\"\n    },\n    \"consignee\": {\n        \"consigneeCountry\": \"PL\",\n        \"consigneeCity\": \"Słupsk\",\n        \"consigneePostcode\": \"76-200\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00.000Z\",\n    \"consigneeDeliverOn\": \"2024-01-13T00:00:00.000Z\",\n    \"distance\": 50,\n    \"price\": 9000,\n    \"status\": \"QUOTED\"\n}"
+						},
+						{
+							"name": "Bad Request",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/quote/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										"quote",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "3667b1dd-d24a-4ca2-bbc1-7f6e8836e7ddj",
+											"description": "UUID"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "52"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"34-Oq1/girUaxlwjpQV0wQd2mfLXo4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:24:11 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Invalid quote id\",\n    \"error\": \"Bad Request\"\n}"
+						},
+						{
+							"name": "Distance Error",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/quote/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										"quote",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "86fd1261-9032-479d-a35b-ae6cee567c65",
+											"description": "UUID"
+										}
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "155"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"9b-A09KAh5Y92T6aZuXYOkvH90Ou08\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:26:10 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"note\": \"The distance between the shipper and consignee is not in operational range.\",\n    \"distance\": 388,\n    \"code\": 422,\n    \"status\": \"Contact us for more information\"\n}"
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/quote/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										"quote",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "f8ca95b7-1a14-4edc-b114-f80dfb727cbb",
+											"description": "UUID"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "59"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"3b-xzq5vQSjQLEVQv2AoWL6HKfTabY\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 14 Jan 2024 09:30:01 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"No active quotation found\",\n    \"error\": \"Not Found\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Book Quote",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shipper\": {\n    \"shipperPickupOn\": \"2024-01-18T12:00:00Z\"\n  },\n  \"consignee\": {\n    \"consigneeDeliveryOn\": \"2024-01-21\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/{{prefix}}/orders/:quoteId",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"{{prefix}}",
+								"orders",
+								":quoteId"
+							],
+							"variable": [
+								{
+									"key": "quoteId",
+									"value": "f2deb6c6-79d5-4b06-a55b-e157f1a3c7fc"
+								}
+							]
+						},
+						"description": "### Book Order\n\nThis endpoint allows the user to create an order for a given quote.\n\n#### Request Body\n\n- `shipperPickupOn` (Datetime/Timestamp): The date and time for the shipper's pickup.\n- `consigneeDeliveryOn` (Date): The date for the consignee's delivery."
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "112"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"70-M9O7j62JtQS5Gq7bFR3nJC0UFqE\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:29:29 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Booking successful.\",\n    \"orderId\": 3,\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\",\n    \"status\": \"BOOKED\"\n}"
+						},
+						{
+							"name": "Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"shipper\": {\n    \"shipperPickupOn\": \"2024-01-18T12:00:00Z\"\n  },\n  \"consignee\": {\n    \"consigneeDeliveryOn\": \"2024-01-21\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "f2deb6c6-79d5-4b06-a55b-e157f1a3c7fc"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "113"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"71-DRgQgTJYXtMe6SiWXb53bnsGB0E\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 14 Jan 2024 12:03:52 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Booking successful.\",\n    \"orderId\": 15,\n    \"quoteId\": \"f2deb6c6-79d5-4b06-a55b-e157f1a3c7fc\",\n    \"status\": \"BOOKED\"\n}"
+						},
+						{
+							"name": "Invalid Quote ID",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/:quoteId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										":quoteId"
+									],
+									"variable": [
+										{
+											"key": "quoteId",
+											"value": "3667b1dd-d24a-4ca2-bbc1-7f6e8836e7ddc"
+										}
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "52"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"34-Oq1/girUaxlwjpQV0wQd2mfLXo4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:30:01 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Invalid quote id\",\n    \"error\": \"Bad Request\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Retrieve Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/{{prefix}}/orders/:orderId",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"{{prefix}}",
+								"orders",
+								":orderId"
+							],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "13"
+								}
+							]
+						},
+						"description": "This endpoint retrieves the details of a specific order identified by the orderId parameter. The response contains information about the shipper, consignee, pickup and delivery dates, distance, price (CENTS), quote ID, and status of the order."
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/:orderId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										":orderId"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "365"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"16d-2fbxZhnJdD/iu9OEpzuLOj7ylPc\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:41:55 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"shipper\": {\n        \"shipperCountry\": \"DE\",\n        \"shipperCity\": \"Potsdam\",\n        \"shipperPostcode\": \"10115\"\n    },\n    \"consignee\": {\n        \"consigneeCountry\": \"PL\",\n        \"consigneeCity\": \"Słupsk\",\n        \"consigneePostcode\": \"76-200\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00.000Z\",\n    \"consigneeDeliverOn\": \"2024-01-13T00:00:00.000Z\",\n    \"distance\": 50,\n    \"price\": 9000,\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\",\n    \"status\": \"BOOKED\"\n}"
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/:orderId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										":orderId"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "49"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"31-cPb5EU/Eb0G3QIbwCzFnLhtET6Y\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:42:31 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Order not found\",\n    \"error\": \"Not Found\"\n}"
+						},
+						{
+							"name": "Invalid ID",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/{{prefix}}/orders/:orderId",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"{{prefix}}",
+										"orders",
+										":orderId"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "5a"
+										}
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "52"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"34-h+hDPvawcx7G359YCRLaSajaesc\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 09 Jan 2024 02:42:44 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Invalid order id\",\n    \"error\": \"Bad Request\"\n}"
+						}
+					]
+				}
+			],
+			"description": "**Getting Started**\n\n1. Request a quote to initiate the process.\n2. Review the quote to get the shipment cost.\n3. Confirm your booking by using the provided quote ID.\n4. Keep track of your order status using the assigned order ID."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "localhost:80",
+			"type": "string"
+		},
+		{
+			"key": "prefix",
+			"value": "api/v1",
+			"type": "string"
+		}
+	]
+}
