@@ -12,6 +12,7 @@ import {
 } from '../utils/api-errors.util'
 import { getQuote } from '../helper/orders.helper'
 import { quoteQueue } from '../services/queue'
+import { setRouteInRedis } from '../helper/cache.helper'
 
 // Enum for order status
 enum QuoteStatus {
@@ -166,60 +167,82 @@ class OrdersController {
       method: req.method,
       body: req.body,
     })
-    // check if quoteId is uuid with zod
-    const quoteIdSchema = z.string().uuid()
-    const quoteIdValidation = quoteIdSchema.safeParse(req.params.quoteId)
 
-    // If quoteId is not uuid, send error message
-    if (!quoteIdValidation.success) {
-      sendErrorResponse(res, 422, 'Invalid quote id', { error: 'Bad Request' })
-      return
-    }
+    const quoteId = req.params.quoteId
+    const updatedData = req.body
 
-    /**
-     * Get order from database
-     */
-    const getOrder = await prisma.order.findFirst({
-      where: {
-        quoteId: quoteIdValidation.data,
-        status: QuoteStatus.Quoted,
-      },
-      include: {
-        shipper: true,
-        consignee: true,
-      },
-    })
-
-    /**
-     * If order is not found, send error message
-     */
-    if (!getOrder) {
-      sendErrorResponse(res, 404, 'No active quotation found', {
-        error: 'Not Found',
+    try {
+      /**
+       * Get order from database
+       */
+      const getOrder = await prisma.order.findFirst({
+        where: {
+          quoteId: quoteId,
+          status: QuoteStatus.Quoted,
+        },
+        include: {
+          shipper: true,
+          consignee: true,
+        },
       })
-      return
+
+      /**
+       * If order is not found, send error message
+       */
+      if (!getOrder) {
+        sendErrorResponse(res, 404, 'No active quotation found', {
+          error: 'Not Found',
+        })
+        return
+      }
+
+      /**
+       * Update order status
+       */
+      const updateOrder = await prisma.order.update({
+        where: {
+          quoteId: quoteId,
+        },
+        data: {
+          shipperPickupOn: updatedData.shipperPickupOn, // update latest
+          consigneeDeliverOn: updatedData.consigneeDeliverOn, // update latest
+          status: QuoteStatus.Booked,
+          lastModifiedAt: new Date(),
+          placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        },
+        include: {
+          shipper: true,
+          consignee: true,
+        },
+      })
+
+      // check if order is updated
+      if (updateOrder) {
+        // format pickup and deliver date
+        const pickupDateFormatted = moment(updateOrder.shipperPickupOn).format(
+          'YYYY-MM-DD',
+        )
+        const deliverDateFormatted = moment(
+          updateOrder.consigneeDeliverOn,
+        ).format('YYYY-MM-DD')
+        // create route key
+        const routeKey = `${updateOrder.shipper.shipperCountry}:${updateOrder.shipper.shipperCity}:${updateOrder.shipper.shipperPostcode}-to-${updateOrder.consignee.consigneeCountry}:${updateOrder.consignee.consigneeCity}:${updateOrder.consignee.consigneePostcode}-pickupOn-${pickupDateFormatted}-deliverOn-${deliverDateFormatted}`
+        // store route in cache
+        await setRouteInRedis(routeKey, moment(pickupDateFormatted).toDate())
+
+        // Send response back to client
+        sendSuccessResponse(res, 200, 'Booking successful.', {
+          orderId: updateOrder.id,
+          quoteId: updateOrder.quoteId,
+          status: updateOrder.status,
+        })
+      }
+    } catch (error) {
+      logger.error('Error processing order booking:', error)
+      sendErrorResponse(res, 500, 'Internal Server Error', {
+        error: 'Internal Server Error',
+      })
     }
-
-    /**
-     * Update order status
-     */
-    const updateOrder = await prisma.order.update({
-      where: {
-        quoteId: quoteIdValidation.data,
-      },
-      data: {
-        status: QuoteStatus.Booked,
-        lastModifiedAt: new Date(),
-        placedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-      },
-    })
-
-    // Send response back to client
-    sendSuccessResponse(res, 200, 'Booking successful.', {
-      orderId: updateOrder.id,
-      quoteId: updateOrder.quoteId,
-      status: updateOrder.status,
-    })
   }
 
   /**

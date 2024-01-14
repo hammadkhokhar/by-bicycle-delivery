@@ -4,7 +4,7 @@ import { processQuotation } from '../helper/orders.helper'
 import logger from '../utils/logger.util'
 
 enum QuoteStatus {
-  Quoted = 'QUOTED'
+  Quoted = 'QUOTED',
 }
 
 const queueWorker = (connection: IORedis): Worker => {
@@ -38,7 +38,7 @@ const queueWorker = (connection: IORedis): Worker => {
         }
         await job.updateData({
           quoteId: result.quoteId,
-          status: QuoteStatus.Quoted
+          status: QuoteStatus.Quoted,
         })
       } catch (error) {
         // Log and handle errors within the worker

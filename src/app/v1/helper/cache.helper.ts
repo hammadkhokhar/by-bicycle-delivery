@@ -5,7 +5,7 @@ import moment from 'moment'
  * Calculates the time-to-live (TTL) until the end of the given day
  * @returns {number} The TTL in seconds.
  */
-function calculateTTLUntilEndOfDay(date:Date): number {
+function calculateTTLUntilEndOfDay(date: Date): number {
   const now = moment()
   const endOfDay = moment(date).endOf('day')
   return endOfDay.diff(now, 'seconds')
@@ -28,13 +28,18 @@ function setRouteInRedis(routeKey: string, pickupDate: Date): Promise<string> {
 
     // Check if redisClient is still defined after the null check
     if (redisClient) {
-      redisClient.setex(routeKey, ttlInSeconds, 'routeExists', (err: any, reply: any) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(reply || 'OK')
-        }
-      })
+      redisClient.setex(
+        routeKey,
+        ttlInSeconds,
+        'routeExists',
+        (err: any, reply: any) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(reply || 'OK')
+          }
+        },
+      )
     } else {
       reject(new Error('Redis client not initialized'))
     }

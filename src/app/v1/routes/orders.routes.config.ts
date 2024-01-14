@@ -41,6 +41,7 @@ export class OrdersRoutes extends CommonRoutesConfig {
     // Create order
     this.app
       .route(`${routePrefix}/:quoteId`)
+      .all(validationMiddleware.validateBooking())
       .post(ordersController.processOrder)
 
     // Get order status

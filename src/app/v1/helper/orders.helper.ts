@@ -16,7 +16,7 @@ enum ShipmentCost {
 }
 
 enum QuoteStatus {
-  QUOTED = 'QUOTED'
+  QUOTED = 'QUOTED',
 }
 
 /**
@@ -25,9 +25,7 @@ enum QuoteStatus {
  * @param routeLength - The length of the delivery route in kilometers.
  * @returns The calculated delivery price in EUR.
  */
-async function calculateDeliveryPrice(
-  routeLength: number,
-): Promise<number> {
+function calculateDeliveryPrice(routeLength: number): number {
   if (routeLength <= 50) {
     return ShipmentCost.MIN
   } else if (routeLength <= 150) {
@@ -45,11 +43,10 @@ async function calculateDeliveryPrice(
  * @param routeLength The length of the route to be validated.
  * @returns A promise that resolves to a boolean indicating whether the route length is valid.
  */
-async function validateRouteRange(distance: number) {
+function validateRouteRange(distance: number) {
   const validatedDistance = z
     .object({ distance: z.number().min(3).max(300) })
-    .safeParse({ distance: distance })
-
+    .safeParse({ distance })
   return validatedDistance
 }
 
@@ -64,14 +61,15 @@ export async function processQuotation(
   quoteId: string,
 ): Promise<any> {
   const cb = new CargoboardServices() // Create an instance of CargoboardServices
-  let price: number = 0 // Initialize price variable
+  let price: number = 0,
+    priceInCents: number = 0 // Initialize price variable
 
   try {
     // Step 1: Get Distance
     let routeDistance = await cb.getDistance(orderRequest)
 
     // Step 2: Distance validation
-    let routeDistanceValidation = await validateRouteRange(routeDistance)
+    let routeDistanceValidation = validateRouteRange(routeDistance)
 
     // If distance validation fails, return an error message
     if (!routeDistanceValidation.success) {
@@ -86,12 +84,13 @@ export async function processQuotation(
     }
 
     // Step 3: Calculate price
-    price = await calculateDeliveryPrice(routeDistance)
+    price = calculateDeliveryPrice(routeDistance)
 
     // Step 4: Check if there is an existing order with the same shipper, consignee, pickup date, and delivery date in Redis
     const pickupDateFormatted = moment(
       orderRequest.shipper.shipperPickupOn,
     ).format('YYYY-MM-DD')
+
     const deliverDateFormatted = moment(
       orderRequest.consignee.consigneeDeliveryOn,
     ).format('YYYY-MM-DD')
@@ -104,7 +103,7 @@ export async function processQuotation(
     price = existingOrderInRedis ? price - 10 : price
 
     // Step 5: Convert price to cents
-    price = price * 100
+    priceInCents = price * 100
 
     /**
      * Step 6: Save order(quotation) to database
@@ -158,20 +157,15 @@ export async function processQuotation(
           orderRequest.consignee.consigneeDeliveryOn,
         ),
         distance: routeDistance,
-        price: price,
+        price: priceInCents,
         quoteId: quoteId,
       },
     })
 
-    // Step 6d: Store route information in Redis if it doesn't exist
-    if (!existingOrderInRedis) {
-      await setRouteInRedis(routeKey, moment(orderRequest.shipper.shipperPickupOn).toDate())
-    }
-
     // Step 7: Send response back to the client
     const responseBackToClient = {
-      distance: routeDistance,
-      price: price,
+      distance: order.distance,
+      price: order.price,
       quoteId: order.quoteId,
       status: QuoteStatus.QUOTED,
     }
@@ -190,8 +184,6 @@ export async function processQuotation(
     }
   }
 }
-
-
 
 // Adds a note to orders
 export async function addOrderNote(id: number, note: string) {
