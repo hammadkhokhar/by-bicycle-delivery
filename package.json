@@ -1,6 +1,6 @@
 {
   "name": "by-bicycle-delivery",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "description": "An advanced microservice transforming last-mile logistics. It offers seamless ordering features, including quotation and booking.",
   "prisma": {
