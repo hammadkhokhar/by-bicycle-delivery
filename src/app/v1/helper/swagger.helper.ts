@@ -11,7 +11,7 @@ const readSwaggerYaml = (filePath: string): any => {
 const getSwaggerSpec = (): any => {
   // Define an array of paths to your Swagger YAML files
   const swaggerPaths: string[] = [
-    path.resolve('src/docs/order_v0.2.yaml'),
+    path.resolve('src/docs/orders.yaml'),
     // Add more paths if needed
   ]
 

@@ -18,7 +18,7 @@ tags:
       3. Confirm your booking by using the provided quote ID.
       4. Keep track of your order status using the assigned order ID.
 paths:
-  /orders/quote:
+  /api/v1/orders/quote:
     post:
       tags:
         - Orders
@@ -120,7 +120,7 @@ paths:
                     message: >-
                       Format must be YYYY-MM-DDTHH:00:00Z and date must be in
                       the future.
-  /orders/quote/{quoteId}:
+  /api/v1/orders/quote/{quoteId}:
     get:
       tags:
         - Orders
@@ -171,7 +171,7 @@ paths:
                     quoteId: 3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd
                     shipper:
                       shipperCountry: DE
-                      shipperCity: Potsdam
+                      shipperCity: Berlin
                       shipperPostcode: '10115'
                     consignee:
                       consigneeCountry: PL
@@ -213,7 +213,7 @@ paths:
                 distance: 388
                 code: 422
                 status: Contact us for more information
-  /orders/{quoteId}:
+  /api/v1/orders/{quoteId}:
     post:
       tags:
         - Orders
@@ -284,7 +284,7 @@ paths:
               example:
                 message: Invalid quote id
                 error: Bad Request
-  /orders/{orderId}:
+  /api/v1/orders/{orderId}:
     get:
       tags:
         - Orders

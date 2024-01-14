@@ -332,7 +332,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\",\n    \"shipper\": {\n        \"shipperCountry\": \"DE\",\n        \"shipperCity\": \"Potsdam\",\n        \"shipperPostcode\": \"10115\"\n    },\n    \"consignee\": {\n        \"consigneeCountry\": \"PL\",\n        \"consigneeCity\": \"Słupsk\",\n        \"consigneePostcode\": \"76-200\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00.000Z\",\n    \"consigneeDeliverOn\": \"2024-01-13T00:00:00.000Z\",\n    \"distance\": 50,\n    \"price\": 9000,\n    \"status\": \"QUOTED\"\n}"
+							"body": "{\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\",\n    \"shipper\": {\n        \"shipperCountry\": \"DE\",\n        \"shipperCity\": \"Berlin\",\n        \"shipperPostcode\": \"10115\"\n    },\n    \"consignee\": {\n        \"consigneeCountry\": \"PL\",\n        \"consigneeCity\": \"Słupsk\",\n        \"consigneePostcode\": \"76-200\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00.000Z\",\n    \"consigneeDeliverOn\": \"2024-01-13T00:00:00.000Z\",\n    \"distance\": 50,\n    \"price\": 9000,\n    \"status\": \"QUOTED\"\n}"
 						},
 						{
 							"name": "Bad Request",
@@ -843,7 +843,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"shipper\": {\n        \"shipperCountry\": \"DE\",\n        \"shipperCity\": \"Potsdam\",\n        \"shipperPostcode\": \"10115\"\n    },\n    \"consignee\": {\n        \"consigneeCountry\": \"PL\",\n        \"consigneeCity\": \"Słupsk\",\n        \"consigneePostcode\": \"76-200\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00.000Z\",\n    \"consigneeDeliverOn\": \"2024-01-13T00:00:00.000Z\",\n    \"distance\": 50,\n    \"price\": 9000,\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\",\n    \"status\": \"BOOKED\"\n}"
+							"body": "{\n    \"shipper\": {\n        \"shipperCountry\": \"DE\",\n        \"shipperCity\": \"Berlin\",\n        \"shipperPostcode\": \"10115\"\n    },\n    \"consignee\": {\n        \"consigneeCountry\": \"PL\",\n        \"consigneeCity\": \"Słupsk\",\n        \"consigneePostcode\": \"76-200\"\n    },\n    \"shipperPickupOn\": \"2024-01-09T12:00:00.000Z\",\n    \"consigneeDeliverOn\": \"2024-01-13T00:00:00.000Z\",\n    \"distance\": 50,\n    \"price\": 9000,\n    \"quoteId\": \"3667b1dd-d24a-4ca2-bbc1-7f6e8836e7dd\",\n    \"status\": \"BOOKED\"\n}"
 						},
 						{
 							"name": "Not Found",
