@@ -3,10 +3,8 @@ import IORedis from 'ioredis'
 const redisConfig = {
   host: process.env.REDIS_HOST,
   password: process.env.REDIS_PASSWORD,
-  port: process.env.REDIS_PORT
-    ? parseInt(process.env.REDIS_PORT, 10)
-    : undefined,
-  maxRetriesPerRequest: null,
+  port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
+  maxRetriesPerRequest: null, // required for pub/sub
 }
 
 let redisClient: IORedis | any

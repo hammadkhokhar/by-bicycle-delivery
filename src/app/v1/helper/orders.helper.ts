@@ -9,21 +9,31 @@ import { IOrder } from '../interfaces/orders.interface'
 import CargoboardServices from '../services/cargoboard.service'
 import { setRouteInRedis, checkRouteExistsInRedis } from './cache.helper'
 
+enum ShipmentCost {
+  MIN = 100,
+  MEDIUM = 200,
+  MAX = 300,
+}
+
+enum QuoteStatus {
+  QUOTED = 'QUOTED'
+}
+
 /**
  * Calculates the delivery price based on the route length.
  *
  * @param routeLength - The length of the delivery route in kilometers.
- * @returns A promise that resolves to the calculated delivery price in EUR.
+ * @returns The calculated delivery price in EUR.
  */
-export async function calculateDeliveryPrice(
+async function calculateDeliveryPrice(
   routeLength: number,
 ): Promise<number> {
   if (routeLength <= 50) {
-    return 100
+    return ShipmentCost.MIN
   } else if (routeLength <= 150) {
-    return 200
+    return ShipmentCost.MEDIUM
   } else if (routeLength > 250) {
-    return 300
+    return ShipmentCost.MAX
   } else {
     return 0
   }
@@ -35,7 +45,7 @@ export async function calculateDeliveryPrice(
  * @param routeLength The length of the route to be validated.
  * @returns A promise that resolves to a boolean indicating whether the route length is valid.
  */
-export async function validateRouteRange(distance: number) {
+async function validateRouteRange(distance: number) {
   const validatedDistance = z
     .object({ distance: z.number().min(3).max(300) })
     .safeParse({ distance: distance })
@@ -44,7 +54,7 @@ export async function validateRouteRange(distance: number) {
 }
 
 /**
- * Export an asynchronous function to process a quotation for an order
+ * Function to process a quotation for an order
  *
  * @param {IOrder} orderRequest - The order request object containing details of the shipment.
  * @returns {Promise<any>} A promise that resolves to the quotation response or an error.
@@ -155,16 +165,15 @@ export async function processQuotation(
 
     // Step 6d: Store route information in Redis if it doesn't exist
     if (!existingOrderInRedis) {
-      await setRouteInRedis(routeKey)
+      await setRouteInRedis(routeKey, moment(orderRequest.shipper.shipperPickupOn).toDate())
     }
 
     // Step 7: Send response back to the client
     const responseBackToClient = {
       distance: routeDistance,
       price: price,
-      quoteExpiry: moment().add(1, 'hour').valueOf(),
       quoteId: order.quoteId,
-      status: 'QUOTED',
+      status: QuoteStatus.QUOTED,
     }
 
     return responseBackToClient
@@ -181,6 +190,8 @@ export async function processQuotation(
     }
   }
 }
+
+
 
 // Adds a note to orders
 export async function addOrderNote(id: number, note: string) {
