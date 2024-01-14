@@ -7,7 +7,7 @@ import prisma from '../utils/prisma.util'
 import logger from '../utils/logger.util'
 import { IOrder } from '../interfaces/orders.interface'
 import CargoboardServices from '../services/cargoboard.service'
-import { setRouteInRedis, checkRouteExistsInRedis } from './cache.helper'
+import { checkRouteExistsInRedis } from './cache.helper'
 
 enum ShipmentCost {
   MIN = 100,
@@ -25,7 +25,7 @@ enum QuoteStatus {
  * @param routeLength - The length of the delivery route in kilometers.
  * @returns The calculated delivery price in EUR.
  */
-function calculateDeliveryPrice(routeLength: number): number {
+export function calculateDeliveryPrice(routeLength: number): number {
   if (routeLength <= 50) {
     return ShipmentCost.MIN
   } else if (routeLength <= 150) {
@@ -43,7 +43,7 @@ function calculateDeliveryPrice(routeLength: number): number {
  * @param routeLength The length of the route to be validated.
  * @returns A promise that resolves to a boolean indicating whether the route length is valid.
  */
-function validateRouteRange(distance: number) {
+export function validateRouteRange(distance: number) {
   const validatedDistance = z
     .object({ distance: z.number().min(3).max(300) })
     .safeParse({ distance })

@@ -5,6 +5,7 @@ import {
 } from '../helper/orders.helper'
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
+import redisClient from '../utils/redis.util'
 
 jest.mock('axios')
 
@@ -14,19 +15,19 @@ jest.mock('axios')
 describe('Delivery Price Calculator', () => {
   it('should return 100 for route length <= 50', async () => {
     const routeLength = 50
-    const result = await calculateDeliveryPrice(routeLength)
+    const result = calculateDeliveryPrice(routeLength)
     expect(result).toBe(100)
   })
 
   it('should return 200 for route length <= 150', async () => {
     const routeLength = 150
-    const result = await calculateDeliveryPrice(routeLength)
+    const result = calculateDeliveryPrice(routeLength)
     expect(result).toBe(200)
   })
 
   it('should return 300 for route length > 250', async () => {
     const routeLength = 300
-    const result = await calculateDeliveryPrice(routeLength)
+    const result = calculateDeliveryPrice(routeLength)
     expect(result).toBe(300)
   })
 })
@@ -37,19 +38,19 @@ describe('Delivery Price Calculator', () => {
 describe('Route Range Validator', () => {
   it('should return validated distance object for distance between 3 and 300', async () => {
     const distance = 150
-    const result = await validateRouteRange(distance)
+    const result = validateRouteRange(distance)
     expect(result.success).toBe(true)
   })
 
   it('should return error for distance less than 3', async () => {
     const distance = 2
-    const result = await validateRouteRange(distance)
+    const result =  validateRouteRange(distance)
     expect(result.success).toBe(false)
   })
 
   it('should return error for distance greater than 300', async () => {
     const distance = 350
-    const result = await validateRouteRange(distance)
+    const result = validateRouteRange(distance)
     expect(result.success).toBe(false)
   })
 })
@@ -69,7 +70,7 @@ describe('Quotation Processor', () => {
         shipperCity: 'Berlin',
         shipperPostcode: '10115',
       },
-      shipperPickupOn: '2024-01-16T20:00:00Z',
+      shipperPickupOn: new Date('2024-01-25T20:00:00Z'),
     },
     consignee: {
       address: {
@@ -77,7 +78,7 @@ describe('Quotation Processor', () => {
         consigneeCity: 'Słupsk',
         consigneePostcode: '76-200',
       },
-      consigneeDeliveryOn: '2024-01-20',
+      consigneeDeliveryOn: new Date('2024-01-30'),
     },
   }
 
@@ -111,4 +112,8 @@ describe('Quotation Processor', () => {
     const result = await processQuotation(orderRequest, uuidv4())
     expect(result.status).toBe('QUOTED')
   })
+  afterAll(async () => {
+    // Close the Redis connection
+    await redisClient.quit();
+  });
 })

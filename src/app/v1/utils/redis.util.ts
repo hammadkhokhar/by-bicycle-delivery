@@ -1,4 +1,5 @@
 import IORedis from 'ioredis'
+import logger from './logger.util';
 
 const redisConfig = {
   host: process.env.REDIS_HOST,
@@ -13,9 +14,9 @@ let redisClient: IORedis | any
 ;(async () => {
   try {
     redisClient = new IORedis(redisConfig)
-    console.log('Redis client connected')
+    logger.info('Redis client connected')
   } catch (error) {
-    console.error('Error connecting to Redis:', (error as Error).message)
+    logger.error('Error connecting to Redis:', (error as Error).message)
     process.exit(1)
   }
 })()
