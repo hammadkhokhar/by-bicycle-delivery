@@ -73,8 +73,8 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 
 - Clone the repo
 - Change `.env.example` to `.env` and add your environment variables
-- Redis instance can be created on [upstash](https://console.upstash.com/pages/sign-up) or locally (make sure to create a database)
-- Postgresql instance [supabase](https://supabase.io/) can be used or locally (make sure to create a database)
+- Redis instance can be created on [upstash](https://console.upstash.com/pages/sign-up) or locally
+- Postgresql instance [supabase](https://supabase.io/) can be used or locally
 - Learn more about Prisma-Postgresql setup [here](https://www.prisma.io/docs/orm/overview/databases/postgresql) and configure in env
 
 ## Start
