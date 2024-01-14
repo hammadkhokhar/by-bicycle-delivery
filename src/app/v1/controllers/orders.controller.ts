@@ -93,8 +93,8 @@ class OrdersController {
     const isCompleted = await queueRes?.isCompleted()
 
     // Response if the job is completed
-    if (isCompleted && queueRes?.data.status === QuoteStatus.Quoted) {
-      let quoteDetails = await getQuote(req.params.quoteId)
+    if (isCompleted) {
+      let quoteDetails = await getQuote(quoteIdValidation.data)
       if (quoteDetails == null) {
         sendErrorResponse(res, 404, 'No active quotation found', {
           error: 'Not Found',
@@ -194,7 +194,9 @@ class OrdersController {
      * If order is not found, send error message
      */
     if (!getOrder) {
-      sendErrorResponse(res, 404, 'Order not found', { error: 'Not Found' })
+      sendErrorResponse(res, 404, 'No active quotation found', {
+        error: 'Not Found',
+      })
       return
     }
 

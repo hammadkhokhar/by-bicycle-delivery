@@ -53,7 +53,6 @@ server.listen(port, async () => {
   logger.info('Queue worker configured and started')
   queueProcessor.on('completed', async (job) => {
     logger.info(`Job completed: ${job.id}`)
-    await job.remove() // remove job once completed to clear up memory
   })
   queueProcessor.on('failed', (job, err) => {
     logger.error(`Job failed: ${job?.id}`, err)

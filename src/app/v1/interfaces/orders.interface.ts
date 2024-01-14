@@ -8,7 +8,7 @@ interface IOrder {
       shipperCity: string
       shipperPostcode: string
     }
-    shipperPickupOn: string
+    shipperPickupOn: Date
   }
   consignee: {
     address: {
@@ -16,7 +16,7 @@ interface IOrder {
       consigneeCity: string
       consigneePostcode: string
     }
-    consigneeDeliveryOn: string
+    consigneeDeliveryOn: Date
   }
 }
 

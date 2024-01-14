@@ -30,7 +30,11 @@ const queueWorker = (connection: IORedis): Worker => {
             code: result.error.code,
             status: 'Contact us for more information',
           })
+          return
         }
+        await job.updateData({
+          quoteId: result.quoteId
+        })
       } catch (error) {
         // Log and handle errors within the worker
         logger.error('Error processing job', job.name, job.id, error)
