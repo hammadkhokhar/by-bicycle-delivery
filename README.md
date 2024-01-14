@@ -1,10 +1,13 @@
 # By Bicycle Delivery
 
-An advanced microservice transforming last-mile logistics. It offers seamless ordering features, including quotation and booking, enhancing efficiency in eco-friendly bicycle deliveries.
+## Introduction
+
+This project addresses the challenge of last-mile logistics through an advanced microservice. It streamlines the ordering process with features like quotation and booking, promoting eco-friendly bicycle deliveries.
+
 
 # Stack
 
-BACKEND:
+SERVER:
 
 ![NodeJS](https://img.shields.io/badge/NodeJS-21.5.0-green?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.18.2-lightgrey?style=for-the-badge&logo=express&logoColor=white) ![Typescript](https://img.shields.io/badge/Typescript-4.3.5-blue?style=for-the-badge&logo=typescript&logoColor=white) ![nodemon](https://img.shields.io/badge/nodemon-2.0.12-green?style=for-the-badge&logo=nodemon&logoColor=white)
@@ -19,9 +22,11 @@ Used for making HTTP requests to Cargoboard Distance API
 
 CACHE & BACKGROUND JOBS:
 
-![BullMQ](https://img.shields.io/badge/BullMQ-5.1.1-yellow?style=for-the-badge&logo=npm&logoColor=white) ![IoRedis](https://img.shields.io/badge/IoRedis-5.3.2-red?style=for-the-badge&logo=redis&logoColor=white)![Redis](https://img.shields.io/badge/Redis-4.6.12-red?style=for-the-badge&logo=redis&logoColor=white)
+![BullMQ](https://img.shields.io/badge/BullMQ-5.1.1-yellow?style=for-the-badge&logo=npm&logoColor=white) ![IoRedis](https://img.shields.io/badge/IoRedis-5.3.2-red?style=for-the-badge&logo=redis&logoColor=white)
 
-Redis is used for caching and BullMQ for background jobs. For in-memory operations, redis appears to be promising in terms of efficiency and scalability. It is also used for caching. BullMQ is used for background jobs. It is a Redis-based queue for Node. It builds on top of Redis and uses the same data structures to model the queues, but it provides a simple API for enqueuing and processing jobs in Node. It also supports distributed workers out of the box.
+Redis is used as in-memory database. It's powerful data structures and fast performance makes it a great choice for caching and background jobs. In terms of performance, Redis can perform millions of operations per second which makes it ideal for scenarios where high throughput is required and latency needs to be kept at a minimum. ioRedis is used as a Redis client.
+
+BullMQ is used for background jobs. It is a Redis-based queue for Node. It builds on top of Redis and uses the same data structures to model the queues, but it provides a simple API for enqueuing and processing jobs in Node. It also supports distributed workers out of the box.
 
 DATABASE:
 
@@ -57,51 +62,45 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 
 ### Prerequisites
 
-- Node.js
+- NodeJS
 - Typescript
 - Yarn
 - Postgresql
 - Redis
 - Cargoboard Distance basic auth (encoded)
 
-### Installation
+## Installation
 
 - Clone the repo
-- Run `yarn install` to install dependencies
 - Change `.env.example` to `.env` and add your environment variables
+- Redis instance can be created on [upstash](https://console.upstash.com/pages/sign-up) or locally (make sure to create a database)
+- Postgresql instance [supabase](https://supabase.io/) can be used or locally (make sure to create a database)
+- Learn more about Prisma-Postgresql setup [here](https://www.prisma.io/docs/orm/overview/databases/postgresql) and configure in env
 
-## <b> DB Setup </b>
+## Start
 
-- Learn more about Prisma-Postgresql setup [here](https://www.prisma.io/docs/orm/overview/databases/postgresql)
-- Install Postgresql or use a cloud service
-- Create a database
-- Add database URL to the `.env` file
-- Run `npx prisma db push` to create tables
-- Run `npx prisma generate` to generate Prisma client
-- Run `npx prisma studio` to open prisma studio
-
-## <b> Start </b>
-
-- Start the app with `yarn start` (builds and runs the app)
+- One command start with `yarn ready` (packages installation, tables creation, app build and start)
+- Start app in production mode with `yarn start`
 - Start app in development mode with `yarn dev` (nodemon is used for hot reloading, so make sure you have it installed globally)
+- Test app with `yarn test`
 
-## <b> API Documentation </b>
+## API Documentation
 
 - Swagger documentation is available at the `/documentation` endpoint
 - Postman collection is available in the `docs` folder
 
-## <b> Features List </b>
+## Features List
 
 1. **Quota Limits Handling:**
 
-   - [x] Implement logic to respect the quota limits set by Cargoboard Distance (5 requests per minute) for requests made by By Bicycle Delivery.
+   - [x] Implement logic to respect the quota limits set by Cargoboard Distance (5 requests per minute) for requests made by API.
    - [x] Ensure the solution can handle as many client requests as possible within its processing and network resources.
    - [x] Implement a mechanism to queue and process requests efficiently.
 
 2. **CLI Command Setup:**
 
    - [x] Create a CLI command that, when executed after cloning from GitHub, sets up the solution on a local machine.
-   - [x] Include prompts for setting authorization parameters
+   - [x] Include prompts for setting env parameters
 
 3. **Caching Layer:**
 
@@ -119,11 +118,12 @@ Zod is used for validation. It is a TypeScript-first schema declaration and vali
 6. **OpenAPI Schema Integration:**
 
    - [x] Integrate the OpenAPI schema with a UI
-   - [x] Facilitate manual testing by providing clear documentation on how to interact with and test the API.
+   - [x] Documentation on how to interact with and test the API.
+   - [x] Postman collection
 
 7. **Documentation:**
 
    - [x] Provide comprehensive documentation for setting up, configuring, and maintaining the solution.
 
 8. **Containerization:**
-   - [ ] Tested the containerized solution locally.
+   - [x] Tested the containerized solution locally. Might face issue with Redis connection.
