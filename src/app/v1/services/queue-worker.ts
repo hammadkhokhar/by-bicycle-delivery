@@ -3,6 +3,10 @@ import { Worker, WorkerOptions, Job } from 'bullmq'
 import { processQuotation } from '../helper/orders.helper'
 import logger from '../utils/logger.util'
 
+enum QuoteStatus {
+  Quoted = 'QUOTED'
+}
+
 const queueWorker = (connection: IORedis): Worker => {
   // Create a new worker options object
   const workerOptions: WorkerOptions = {
@@ -33,7 +37,8 @@ const queueWorker = (connection: IORedis): Worker => {
           return
         }
         await job.updateData({
-          quoteId: result.quoteId
+          quoteId: result.quoteId,
+          status: QuoteStatus.Quoted
         })
       } catch (error) {
         // Log and handle errors within the worker

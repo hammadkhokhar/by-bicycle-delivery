@@ -93,7 +93,7 @@ class OrdersController {
     const isCompleted = await queueRes?.isCompleted()
 
     // Response if the job is completed
-    if (isCompleted) {
+    if (isCompleted && queueRes?.data.status === QuoteStatus.Quoted) {
       let quoteDetails = await getQuote(quoteIdValidation.data)
       if (quoteDetails == null) {
         sendErrorResponse(res, 404, 'No active quotation found', {
