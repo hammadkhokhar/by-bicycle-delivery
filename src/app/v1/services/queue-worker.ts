@@ -19,7 +19,6 @@ const queueWorker = (connection: IORedis): Worker => {
         await delay(12000) // delay for 12 seconds to avoid rate limiting with distance API
         logger.info('Worker processing job', job.name, job.id)
         const result = await processQuotation(job.data, job.id as string)
-        logger.info('Worker completed job', job.name, job.id)
 
         // check if error
         if (result.error) {
@@ -30,12 +29,6 @@ const queueWorker = (connection: IORedis): Worker => {
             distance: result.error.distance,
             code: result.error.code,
             status: 'Contact us for more information',
-          })
-        } else {
-          await job.updateData({
-            note: 'Quotation processed successfully',
-            quoteId: result.quoteId,
-            status: 'QUOTED',
           })
         }
       } catch (error) {

@@ -5,7 +5,6 @@ import cors from 'cors'
 import { setupSwagger } from './app/v1/helper/swagger.helper'
 import debug from 'debug'
 import swaggerUi from 'swagger-ui-express'
-import IORedis from 'ioredis'
 import queueWorker from './app/v1/services/queue-worker'
 import errorHandler from './app/v1/utils/error.util'
 import { CommonRoutesConfig } from './common/common.routes.config'
@@ -42,7 +41,7 @@ const routes: CommonRoutesConfig[] = [new OrdersRoutes(app)] // Initialize the r
 
 // Default route
 app.get('/', (req: express.Request, res: express.Response) => {
-  res.status(200).send(`Server running at http://localhost:${port}`)
+  res.status(200).send(`Server operational on port:${port}`)
 })
 
 // Error Handling middleware
@@ -50,16 +49,15 @@ app.use(errorHandler)
 
 // Start the HTTP server
 server.listen(port, async () => {
-  // queue worker configuration
-  const queueProcessor = queueWorker(redisClient)
-  queueProcessor.on('completed', (job) => {
+  const queueProcessor = queueWorker(redisClient) // queue worker configuration
+  logger.info('Queue worker configured and started')
+  queueProcessor.on('completed', async (job) => {
     logger.info(`Job completed: ${job.id}`)
+    await job.remove() // remove job once completed to clear up memory
   })
   queueProcessor.on('failed', (job, err) => {
     logger.error(`Job failed: ${job?.id}`, err)
   })
-
-  logger.info('Queue worker configured and started')
 
   // Log configured routes
   routes.forEach((route: CommonRoutesConfig) => {

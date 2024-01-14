@@ -11,7 +11,7 @@ const redisConfig = {
 
 let redisClient: IORedis | any
 
-// Ensure that the client is connected before exporting it
+  // Ensure that the client is connected before exporting it
 ;(async () => {
   try {
     redisClient = new IORedis(redisConfig)
